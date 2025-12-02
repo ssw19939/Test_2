@@ -20,7 +20,6 @@
         body {
             font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
             background: var(--bg-main);
-            /* 모눈종이 패턴 */
             background-image: linear-gradient(0deg, transparent 24%, rgba(129, 199, 132, 0.1) 25%, rgba(129, 199, 132, 0.1) 26%, transparent 27%, transparent 74%, rgba(129, 199, 132, 0.1) 75%, rgba(129, 199, 132, 0.1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(129, 199, 132, 0.1) 25%, rgba(129, 199, 132, 0.1) 26%, transparent 27%, transparent 74%, rgba(129, 199, 132, 0.1) 75%, rgba(129, 199, 132, 0.1) 76%, transparent 77%, transparent);
             background-size: 50px 50px;
             color: var(--text-primary);
@@ -423,13 +422,19 @@
 `;
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`, {
+            // ★ 사용자가 요청한 엔드포인트 적용 ★
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
             });
 
             const data = await res.json();
+            
+            if(data.error) {
+                throw new Error(data.error.message);
+            }
+
             const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "해석을 불러오지 못했습니다.";
             
             resultDiv.innerHTML = marked.parse(aiText);
@@ -445,6 +450,7 @@
 
         } catch (err) {
             resultDiv.innerHTML = `⚠️ 오류: ${err.message}`;
+            console.error(err);
         }
     }
 
@@ -575,4 +581,3 @@
 </script>
 </body>
 </html>
-

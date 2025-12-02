@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HG AI Agents</title>
+    <title>HG AI Agents - Panda Tarot</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* --- [테마 정의: 대나무 판다 컨셉] --- */
+        /* --- [테마 정의] --- */
         :root {
-            --bg-main: #e9f5ec;       
-            --panel-bg: #ffffff;      
-            --accent-dark: #2d5a27;   
-            --accent-light: #81c784;  
-            --text-primary: #1b3318;  
-            --msg-ai-bg: #f1f8e9;     
-            --msg-user-bg: #43a047;   
-            --error-color: #e57373;
+            --bg-main: #e9f5ec;
+            --panel-bg: #ffffff;
+            --accent-dark: #2d5a27;
+            --accent-light: #81c784;
+            --text-primary: #1b3318;
+            --card-back: #43a047;
+            --card-selected: #ffd54f;
         }
 
         body {
@@ -33,50 +32,23 @@
             position: relative;
         }
 
-        /* [추가] 왼쪽 대나무 숲 */
-        .bamboo-bg.left {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 30vw; /* 화면 너비의 30% 차지 */
-            height: 50vh; /* 화면 높이의 50% 차지 */
-            background-image: url('https://images.unsplash.com/photo-1596323606046-a192809633e1?q=80&w=600&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center bottom;
-            background-repeat: no-repeat;
-            z-index: -1;
-            /* 위쪽 자연스럽게 페이드 아웃 */
+        /* 배경 장식 */
+        .bamboo-bg {
+            position: fixed; bottom: 0; width: 30vw; height: 50vh;
+            background-size: cover; background-repeat: no-repeat;
+            z-index: -1; pointer-events: none;
             mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
             -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
         }
+        .bamboo-bg.left { left: 0; background-image: url('https://images.unsplash.com/photo-1596323606046-a192809633e1?q=80&w=600&auto=format&fit=crop'); }
+        .bamboo-bg.right { right: 0; background-image: url('https://images.unsplash.com/photo-1515523916629-688755d496e5?q=80&w=600&auto=format&fit=crop'); background-position: left bottom; }
 
-        /* [추가] 오른쪽 대나무 숲 */
-        .bamboo-bg.right {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 30vw;
-            height: 50vh;
-            background-image: url('https://images.unsplash.com/photo-1515523916629-688755d496e5?q=80&w=600&auto=format&fit=crop');
-            background-size: cover;
-            background-position: left bottom;
-            background-repeat: no-repeat;
-            z-index: -1;
-            /* 위쪽 자연스럽게 페이드 아웃 */
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-        }
+        @media (max-width: 800px) { .bamboo-bg { opacity: 0.3; width: 40vw; } }
 
-        /* 모바일 대응: 화면 좁으면 대나무 숨김 (채팅 방해 방지) */
-        @media (max-width: 800px) {
-            .bamboo-bg { opacity: 0.3; width: 40vw; } /* 살짝만 보이게 */
-        }
-
+        /* 메인 컨테이너 */
         #app {
-            width: 100%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
+            width: 100%; max-width: 600px;
+            display: flex; flex-direction: column;
             background: var(--panel-bg);
             position: relative;
             box-shadow: 0 10px 25px rgba(45, 90, 39, 0.15);
@@ -84,202 +56,102 @@
             overflow: hidden;
             margin: 10px;
             border: 2px solid var(--accent-light);
-            z-index: 1; 
+            z-index: 1;
         }
 
-        /* 헤더바 */
+        /* 헤더 */
         .header-bar {
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            background: var(--accent-dark);
-            color: white;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 15px; text-align: center; font-weight: bold; font-size: 1.2rem;
+            background: var(--accent-dark); color: white;
+            position: relative; display: flex; justify-content: center; align-items: center;
+        }
+        .top-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.6);
+            padding: 5px 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer;
+        }
+        #home-btn { left: 15px; }
+        #history-btn { right: 50px; }
+        .admin-trigger { position: absolute; right: 15px; cursor: pointer; opacity: 0.7; }
+
+        /* 공통 뷰 스타일 */
+        .view-section {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;
         }
 
-        /* 관리자 아이콘 */
-        .admin-icon {
-            position: absolute;
-            right: 15px;
-            cursor: pointer;
-            font-size: 1.2rem;
-            opacity: 0.8;
-            transition: opacity 0.2s;
+        /* 1. 시작 화면 */
+        #start-view {
+            align-items: center; justify-content: center; padding: 20px; text-align: center;
         }
-        .admin-icon:hover { opacity: 1; transform: rotate(90deg); transition: 0.3s; }
-
-        /* 채팅창 */
-        #chat-box {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .panda-mascot {
+            width: 150px; height: 150px; margin-bottom: 20px;
+            /* 기본값: 같은 폴더의 panda.png */
+            background-image: url('./panda.png'); 
+            background-size: cover; background-position: center;
+            border-radius: 50%;
+            border: 5px solid var(--accent-light);
             background-color: #fff;
         }
-        .msg {
-            max-width: 85%;
-            padding: 12px 18px;
-            border-radius: 18px;
-            line-height: 1.6;
-            font-size: 0.95rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        #user-input {
+            width: 80%; padding: 15px; margin-bottom: 15px;
+            border: 2px solid var(--accent-light); border-radius: 25px;
+            font-size: 1rem; text-align: center; outline: none;
         }
-        .msg.ai {
-            align-self: flex-start;
-            background: var(--msg-ai-bg);
-            color: var(--text-primary);
-            border-bottom-left-radius: 4px;
-            border: 1px solid var(--accent-light);
+        .main-btn {
+            padding: 12px 40px; background: var(--accent-dark); color: white;
+            border: none; border-radius: 25px; font-size: 1.1rem; font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
-        .msg.ai::before { content: '🐼'; margin-right: 8px; }
+        .main-btn:active { transform: scale(0.98); }
+        .main-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
-        .msg.user {
-            align-self: flex-end;
-            background: var(--msg-user-bg);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        /* 입력창 영역 */
-        #input-area {
-            padding: 15px;
-            background: var(--bg-main);
-            border-top: 2px solid var(--accent-light);
-            display: flex;
-            gap: 10px;
-        }
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            background: #ffffff;
-            border: 2px solid var(--accent-light);
-            color: var(--text-primary);
-            border-radius: 25px;
-            outline: none;
-        }
-        button {
-            padding: 10px 24px;
-            background: var(--accent-dark);
-            border: none;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            color: white;
-            transition: background 0.2s;
-        }
-        button:hover { background: #3d7c36; }
-
-        /* --- [모달 공통 디자인] --- */
-        .modal {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+        /* 2. 카드 게임 & 결과 화면 */
+        #game-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.98);
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             z-index: 10;
-            padding-top: 20px;
-            overflow-y: auto;
         }
+        .game-header { padding: 15px; text-align: center; background: #f1f8e9; border-bottom: 1px solid #ddd; }
+        .card-table { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; align-content: flex-start; perspective: 1000px; }
+        .card { width: 50px; height: 80px; background: var(--card-back); border-radius: 6px; border: 2px solid white; cursor: pointer; transition: 0.3s; position: relative; }
+        .card::after { content: "🎋"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5; }
+        .card.selected { transform: translateY(-15px) scale(1.1); background: var(--card-selected); z-index: 5; }
+        .game-footer { padding: 15px; text-align: center; border-top: 1px solid #ddd; background: white; }
+
+        /* 결과 화면 */
+        #result-view { background: #f9fbe7; }
+        .result-scroll { flex: 1; overflow-y: auto; padding: 20px; }
+        .speech-bubble { background: white; border-radius: 18px; padding: 20px; border: 1px solid #dcedc8; position: relative; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: #f1f8e9; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; padding: 4px 8px; font-size: 12px; }
+
+        /* 3. 기록(History) 화면 */
+        #history-view { background: #fff; }
+        .history-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .history-item {
+            border: 1px solid #eee; border-radius: 10px; padding: 15px; margin-bottom: 10px;
+            background: #f9f9f9; cursor: pointer; transition: 0.2s;
+        }
+        .history-item:hover { background: #e8f5e9; border-color: var(--accent-light); }
+        .h-date { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+        .h-q { font-weight: bold; color: var(--accent-dark); margin-bottom: 5px; }
+        .h-preview { font-size: 0.9rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 4. 관리자(Admin) 화면 */
+        #admin-view { padding: 20px; background: #f0f0f0; }
+        .admin-form { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--accent-dark); }
+        .form-group input { width: 90%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .preview-box { margin-top: 10px; text-align: center; }
+        .preview-box img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent-light); object-fit: cover; }
+
+        /* 유틸리티 */
         .hidden { display: none !important; }
-        
-        .number-form {
-            width: 90%;
-            max-width: 400px;
-            padding-bottom: 50px;
-        }
-        
-        .deck-section {
-            background: #f1f8e9;
-            border: 1px solid var(--accent-light);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .deck-section h3 {
-            margin: 0 0 10px 0;
-            color: var(--accent-dark);
-            font-size: 1rem;
-            display: flex;
-            justify-content: space-between;
-        }
-        .deck-section span { font-size: 0.8rem; color: #666; font-weight: normal; }
-
-        .input-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
-        
-        .input-item { display: flex; flex-direction: column; align-items: center; }
-        .input-item label { font-size: 0.75rem; color: var(--accent-dark); margin-bottom: 4px; font-weight: bold; }
-        
-        .num-input {
-            width: 100%;
-            padding: 8px 0;
-            text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            background: white;
-            transition: border-color 0.2s;
-        }
-        .num-input:focus { border-color: var(--msg-user-bg); background: #e8f5e9; }
-        .num-input.error { border-color: var(--error-color); background: #ffebee; }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.1rem;
-            margin-top: 10px;
-            background: var(--accent-dark);
-            box-shadow: 0 4px 10px rgba(45, 90, 39, 0.3);
-            color: white; border: none; border-radius: 8px; cursor: pointer;
-        }
-        .close-btn {
-            width: 100%; background: #ccc; color: #333; margin-top:10px; padding: 10px; border:none; border-radius:8px; cursor: pointer;
-        }
-
-        /* 기록/관리자 버튼 스타일 */
-        .top-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.6);
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 15px;
-            cursor: pointer;
-        }
-        #history-btn { left: 15px; }
-        
-        /* 관리자 모니터링 스타일 */
-        .admin-stat-box {
-            background: #fff;
-            border: 2px solid var(--accent-dark);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            width: 90%;
-            text-align: left;
-        }
-        .log-item {
-            font-size: 0.85rem;
-            border-bottom: 1px solid #eee;
-            padding: 8px 0;
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f8e9; }
-        ::-webkit-scrollbar-thumb { background: #a5d6a7; border-radius: 4px; }
+        .fade-in { animation: fadeIn 0.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loading-dots::after { content: ' .'; animation: dots 1.5s steps(5, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ' .'; } 40% { content: ' ..'; } 60% { content: ' ...'; } 80%, 100% { content: ''; } }
 
     </style>
 </head>
@@ -290,78 +162,93 @@
 
 <div id="app">
     <div class="header-bar">
-        <button id="history-btn" class="top-btn" onclick="showHistory()">기록</button>
-        🎋 대나무 타로 🎋
-        <span class="admin-icon" onclick="openAdminCheck()">⚙️</span>
-    </div>
-    <div id="chat-box">
-        <div class="msg ai">어서오세요! <br>궁금한 사항을 낸나!</div>
-    </div>
-    <div id="input-area">
-        <input type="text" id="user-input" placeholder="고민을 입력하세요..." onkeypress="if(event.key==='Enter') openNumberModal()">
-        <button onclick="openNumberModal()">시작</button>
+        <button id="home-btn" class="top-btn" onclick="showView('start-view')">🏠 홈</button>
+        <span id="app-title-text">대나무 타로</span>
+        <button id="history-btn" class="top-btn" onclick="loadHistory()">📜 기록</button>
+        <span class="admin-trigger" onclick="checkAdmin()">⚙️</span>
     </div>
 
-    <div id="number-modal" class="modal hidden">
-        <h2 style="color:var(--accent-dark); margin-bottom:5px;">카드 선택</h2>
-        <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">각 덱의 범위 내 숫자를 입력하세요.</p>
-
-        <div class="number-form">
-            <div class="deck-section">
-                <h3>Universal Waite <span>(1~78)</span></h3>
-                <div class="input-grid">
-                    <div class="input-item"><label>1.현재</label><input type="number" class="num-input waite" placeholder="선택"></div>
-                    <div class="input-item"><label>2.장애</label><input type="number" class="num-input waite" placeholder="선택"></div>
-                    <div class="input-item"><label>3.과정</label><input type="number" class="num-input waite" placeholder="선택"></div>
-                    <div class="input-item"><label>4.결과</label><input type="number" class="num-input waite" placeholder="선택"></div>
-                </div>
-            </div>
-
-            <div class="deck-section">
-                <h3>Horoscope Belline <span>(1~53)</span></h3>
-                <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="input-item"><label>5.조언1</label><input type="number" class="num-input belline" placeholder="선택"></div>
-                    <div class="input-item"><label>6.조언2</label><input type="number" class="num-input belline" placeholder="선택"></div>
-                    <div class="input-item"><label>7.조언3</label><input type="number" class="num-input belline" placeholder="선택"></div>
-                </div>
-            </div>
-
-            <div class="deck-section">
-                <h3>Lenormand <span>(1~36)</span></h3>
-                <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="input-item"><label>8.사건1</label><input type="number" class="num-input lenormand" placeholder="선택"></div>
-                    <div class="input-item"><label>9.사건2</label><input type="number" class="num-input lenormand" placeholder="선택"></div>
-                    <div class="input-item"><label>10.사건3</label><input type="number" class="num-input lenormand" placeholder="선택"></div>
-                </div>
-            </div>
-
-            <button class="submit-btn" onclick="processNumbers()">결과 보기</button>
-            <button class="close-btn" onclick="closeModal('number-modal')">취소</button>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="modal hidden">
-        <h2 style="color:var(--accent-dark);">🔧 관리자 모니터링</h2>
-        <div class="admin-stat-box">
-            <h4>📊 API / DB 상태</h4>
-            <p>API Key Status: <span style="color:green; font-weight:bold;">Active</span></p>
-            <p>누적 상담 건수: <span id="total-count" style="font-weight:bold;">Loading...</span>건</p>
-        </div>
+    <div id="start-view" class="view-section">
+        <div class="panda-mascot" id="main-mascot"></div>
+        <h2 id="main-title" style="color:var(--accent-dark); margin-bottom:5px;">무엇이 궁금한가?</h2>
+        <p id="main-subtitle" style="color:#666; font-size:0.9rem; margin-bottom:30px;">당신의 고민을 판다가 들어줍니다.</p>
         
-        <div class="admin-stat-box" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
-            <h4>📜 최근 요청 로그 (Last 10)</h4>
-            <div id="log-list" style="overflow-y:auto; flex:1;">
-                </div>
-        </div>
-        <button class="close-btn" style="width:90%; margin-bottom:20px;" onclick="closeModal('admin-modal')">닫기</button>
+        <input type="text" id="user-input" placeholder="예: 이직운이 어떨까요?" onkeypress="if(event.key==='Enter') startGame()">
+        <button class="main-btn" onclick="startGame()">상담 시작하기</button>
     </div>
+
+    <div id="game-overlay" class="view-section hidden">
+        <div class="game-header">
+            <h3 id="stage-title">카드 섞는 중...</h3>
+            <p id="stage-desc">잠시만 기다려주세요.</p>
+        </div>
+        <div id="card-table" class="card-table"></div>
+        <div class="game-footer">
+            <button id="next-stage-btn" class="main-btn hidden" onclick="confirmSelection()">다음 단계로</button>
+            <span id="selection-count" style="font-weight:bold; color:var(--accent-dark);">0 / 4 선택됨</span>
+        </div>
+    </div>
+
+    <div id="result-view" class="view-section hidden">
+        <div class="result-scroll">
+            <div style="text-align:right; margin-bottom:15px;">
+                <span style="background:var(--accent-dark); color:white; padding:8px 15px; border-radius:15px; border-bottom-right-radius:2px; display:inline-block; max-width:80%;">
+                    Q. <span id="display-question">질문</span>
+                </span>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <div class="panda-mascot" style="width:50px; height:50px; margin:0 10px 0 0; border-width:2px;" id="result-mascot"></div>
+                <div class="speech-bubble">
+                    <button class="copy-btn" onclick="copyResult()">📋 복사</button>
+                    <div id="ai-response-content">
+                        <span class="loading-dots" style="font-size:1.2rem; color:#666;">판다가 운명을 해석하고 있습니다</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="padding:15px; border-top:1px solid #eee; background:white;">
+            <button class="main-btn" style="width:100%" onclick="showView('start-view')">새로운 고민 상담하기</button>
+        </div>
+    </div>
+
+    <div id="history-view" class="view-section hidden">
+        <h3 style="text-align:center; color:var(--accent-dark); margin:15px 0;">📜 과거 상담 기록</h3>
+        <div id="history-list" class="history-list">
+            <p style="text-align:center; color:#999; margin-top:50px;">로딩 중...</p>
+        </div>
+    </div>
+
+    <div id="admin-view" class="view-section hidden">
+        <h3 style="text-align:center; color:var(--accent-dark);">🔧 관리자 설정</h3>
+        <div class="admin-form">
+            <div class="form-group">
+                <label>메인 타이틀 문구</label>
+                <input type="text" id="admin-title-input" placeholder="무엇이 궁금한가?">
+            </div>
+            <div class="form-group">
+                <label>서브 타이틀 문구</label>
+                <input type="text" id="admin-subtitle-input" placeholder="당신의 고민을 판다가 들어줍니다.">
+            </div>
+            <div class="form-group">
+                <label>아이콘 이미지 URL (기본값: ./panda.png)</label>
+                <input type="text" id="admin-img-input" placeholder="./panda.png" oninput="previewAdminImg()">
+                <div class="preview-box">
+                    <p style="font-size:0.8rem; color:#666;">미리보기</p>
+                    <img id="admin-img-preview" src="./panda.png" onerror="this.src='./panda.png'">
+                </div>
+            </div>
+            <button id="admin-save-btn" class="main-btn" style="width:100%; margin-top:10px;" onclick="saveAdminSettings()">저장 및 적용</button>
+            <button style="width:100%; margin-top:10px; background:#ccc; border:none; padding:10px; border-radius:20px; cursor:pointer;" onclick="showView('start-view')">나가기</button>
+        </div>
+    </div>
+
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, getCountFromServer } 
-            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // --- Firebase 설정 ---
     const firebaseConfig = {
         apiKey: "AIzaSyDuQDOi5wxabpqdqu-CJfdR-krk5Q08tBA",
         authDomain: "test-9da10.firebaseapp.com",
@@ -371,260 +258,320 @@
         appId: "1:578765851412:web:5d9d30e09f8427d1a49001",
         measurementId: "G-LBY6NM2VGQ"
     };
-   
+    
     let db;
     try {
         const app = initializeApp(firebaseConfig);
         db = getFirestore(app);
-        console.log("🔥 Firebase Connected!");
-    } catch(e) {
-        console.error("Firebase 설정 오류", e);
-    }
+        loadAdminConfig(); // 앱 시작 시 설정 로드
+    } catch(e) { console.error("Firebase Init Error", e); }
 
+    // --- 전역 변수 ---
+    const GEMINI_API_KEY = "AIzaSyB5ax1Xxo8nZo8fhZJXDYMOS5Ctkam_fxk"; 
+
+    // 덱 데이터
     const DECKS = {
-        waite: ["The Fool","The Magician","High Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Strength","Hermit","Wheel of Fortune","Justice","Hanged Man","Death","Temperance","Devil","Tower","Star","Moon","Sun","Judgement","World","Ace of Wands","Two of Wands","Three of Wands","Four of Wands","Five of Wands","Six of Wands","Seven of Wands","Eight of Wands","Nine of Wands","Ten of Wands","Page of Wands","Knight of Wands","Queen of Wands","King of Wands","Ace of Cups","King of Cups","Ace of Swords","King of Swords","Ace of Pentacles","King of Pentacles"],
-        belline: ["Destiny","Success","Loss","Traffic","Union","Family","Amor","Sickness","Treachery","Money","Pleasure","Peace","Gifts","Discovery","Water","Fire","Island","Delayed","Ruins","Table"],
+        waite: { name: "유니버셜 웨이트", count: 78, pick: 4 },
+        belline: { name: "호로스코프 벨린", count: 53, pick: 3 },
+        lenormand: { name: "레노먼드", count: 36, pick: 3 }
+    };
+    // 카드 리스트
+    const FULL_LISTS = {
+        waite: ["The Fool","The Magician","High Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Strength","Hermit","Wheel of Fortune","Justice","Hanged Man","Death","Temperance","Devil","Tower","Star","Moon","Sun","Judgement","World","Ace of Wands","Two of Wands","Three of Wands","Four of Wands","Five of Wands","Six of Wands","Seven of Wands","Eight of Wands","Nine of Wands","Ten of Wands","Page of Wands","Knight of Wands","Queen of Wands","King of Wands","Ace of Cups","Two of Cups","Three of Cups","Four of Cups","Five of Cups","Six of Cups","Seven of Cups","Eight of Cups","Nine of Cups","Ten of Cups","Page of Cups","Knight of Cups","Queen of Cups","King of Cups","Ace of Swords","Two of Swords","Three of Swords","Four of Swords","Five of Swords","Six of Swords","Seven of Swords","Eight of Swords","Nine of Swords","Ten of Swords","Page of Swords","Knight of Swords","Queen of Swords","King of Swords","Ace of Pentacles","Two of Pentacles","Three of Pentacles","Four of Pentacles","Five of Pentacles","Six of Pentacles","Seven of Pentacles","Eight of Pentacles","Nine of Pentacles","Ten of Pentacles","Page of Pentacles","Knight of Pentacles","Queen of Pentacles","King of Pentacles"],
+        belline: ["Destiny","Success","Loss","Traffic","Union","Family","Amor","Sickness","Treachery","Money","Pleasure","Peace","Gifts","Discovery","Water","Fire","Island","Delayed","Ruins","Table","Intelligence","Volft","Enterprise","Elevation","Honors","Thought","Countryside","Presents","Letters","News","Chance","Light","Darkness","Love","Hate","Wedding","Divorce","Children","Parents","Home","Work","Change","Travel","Friendship","Enemy","Sorrow","Joy","Birth","Death","Beginning","End","Soul","Body"], 
         lenormand: ["Rider","Clover","Ship","House","Tree","Clouds","Snake","Coffin","Bouquet","Scythe","Whip","Birds","Child","Fox","Bear","Stars","Stork","Dog","Tower","Garden","Mountain","Crossroad","Mice","Heart","Ring","Book","Letter","Man","Woman","Lily","Sun","Moon","Key","Fish","Anchor","Cross"]
     };
 
-    let currentQuestion = "";
-    // ★ 주의: 실제 본인의 유효한 API 키인지 꼭 확인하세요!
-    let apiKey = "AIzaSyB5ax1Xxo8nZo8fhZJXDYMOS5Ctkam_fxk"; 
+    let gameState = {
+        question: "",
+        stage: 0, 
+        selectedIndices: { waite: [], belline: [], lenormand: [] },
+    };
 
-    window.openNumberModal = () => {
+    // --- 뷰 관리 함수 ---
+    window.showView = (viewId) => {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+    };
+
+    // --- 1. 게임 로직 ---
+    window.startGame = () => {
         const input = document.getElementById('user-input');
-        if(!input.value.trim()) return alert("질문을 먼저 입력해주세요!");
+        if(!input.value.trim()) return alert("질문을 입력해주세요!");
         
-        currentQuestion = input.value;
-        addMessage(currentQuestion, 'user');
-        input.value = '';
-
-        document.getElementById('number-modal').classList.remove('hidden');
-        document.querySelectorAll('.num-input').forEach(el => {
-            el.value = '';
-            el.classList.remove('error');
-        });
+        gameState.question = input.value;
+        gameState.selectedIndices = { waite: [], belline: [], lenormand: [] };
+        
+        document.getElementById('display-question').innerText = gameState.question;
+        document.getElementById('ai-response-content').innerHTML = '<span class="loading-dots" style="font-size:1.2rem; color:#666;">판다가 운명을 해석하고 있습니다</span>';
+        
+        showView('game-overlay');
+        startStage(0); 
     };
 
-    window.closeModal = (id) => {
-        document.getElementById(id).classList.add('hidden');
-    };
+    function startStage(stageIndex) {
+        gameState.stage = stageIndex;
+        let deckType = "";
+        let deckConfig = null;
 
-    // [수정] 입력값 검증 로직 강화 (범위 체크)
-    window.processNumbers = () => {
-        // 1. 입력값 수집
-        const wInputs = document.querySelectorAll('.waite');
-        const bInputs = document.querySelectorAll('.belline');
-        const lInputs = document.querySelectorAll('.lenormand');
-        
-        // 2. 유효성 검사 (Mandatory & Range Check)
-        let errorMsg = "";
-        let hasError = false;
-
-        const validate = (inputs, max, name) => {
-            inputs.forEach(input => {
-                const val = parseInt(input.value);
-                if(!input.value || isNaN(val)) {
-                    input.classList.add('error');
-                    hasError = true;
-                } else if (val < 1 || val > max) {
-                    input.classList.add('error');
-                    hasError = true;
-                    if(!errorMsg.includes(name)) errorMsg += `[${name}] 1~${max} 사이여야 합니다.\n`;
-                } else {
-                    input.classList.remove('error');
-                }
-            });
-        };
-
-        validate(wInputs, 78, "유니버셜 웨이트");
-        validate(bInputs, 53, "호로스코프 벨린");
-        validate(lInputs, 36, "레노먼드");
-
-        if(hasError) {
-            return alert(errorMsg || "모든 칸에 올바른 숫자를 입력해주세요!");
+        if(stageIndex === 0) { deckType = 'waite'; deckConfig = DECKS.waite; }
+        else if(stageIndex === 1) { deckType = 'belline'; deckConfig = DECKS.belline; }
+        else if(stageIndex === 2) { deckType = 'lenormand'; deckConfig = DECKS.lenormand; }
+        else {
+            finishGame();
+            return;
         }
 
-        // 3. 숫자를 카드로 변환 (Modulo 로직 유지하되, 입력은 범위내로 제한됨)
-        const getCard = (val, list) => {
-            const num = parseInt(val);
-            if(isNaN(num) || num < 1) return list[0]; 
-            return list[(num - 1) % list.length];
-        };
+        const title = document.getElementById('stage-title');
+        const desc = document.getElementById('stage-desc');
+        const count = document.getElementById('selection-count');
+        const btn = document.getElementById('next-stage-btn');
+        const table = document.getElementById('card-table');
 
-        const selectedCards = {
-            waite: Array.from(wInputs).map(i => getCard(i.value, DECKS.waite)),
-            belline: Array.from(bInputs).map(i => getCard(i.value, DECKS.belline)),
-            lenormand: Array.from(lInputs).map(i => getCard(i.value, DECKS.lenormand))
-        };
+        btn.classList.add('hidden');
+        table.innerHTML = ''; 
+        count.innerText = `0 / ${deckConfig.pick} 선택됨`;
+        count.style.color = "var(--accent-dark)";
 
-        closeModal('number-modal');
-        callGemini(selectedCards);
-    };
+        title.innerText = `${deckConfig.name} 덱을 섞고 있습니다...`;
+        desc.innerText = "마음을 차분히 하세요.";
+        table.classList.add('shuffling');
 
-    // [추가] 관리자 접속 체크
-    window.openAdminCheck = () => {
-        const pw = prompt("관리자 암호를 입력하세요:");
-        if(pw === "5690") {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            loadAdminStats();
-        } else if (pw !== null) {
-            alert("암호가 올바르지 않습니다.");
+        for(let i=0; i<30; i++) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.transform = `rotate(${Math.random()*20 - 10}deg)`;
+            table.appendChild(card);
         }
-    };
 
-    // [추가] 관리자 통계 로드
-    async function loadAdminStats() {
-        if(!db) return;
-        const countSpan = document.getElementById('total-count');
-        const logList = document.getElementById('log-list');
-        
-        // 1. 총 개수 (Firestore 집계 쿼리는 비용 발생하므로 단순히 최근 로그 가져오기로 대체하거나 실제 구현)
-        // 여기서는 최근 10개만 가져오고 개수는 스냅샷 사이즈로 예시
-        const q = query(collection(db, "tarot_readings"), orderBy("timestamp", "desc"), limit(20));
-        const snapshot = await getDocs(q);
-        
-        countSpan.innerText = snapshot.size + "+ (Recent)"; 
-        
-        logList.innerHTML = "";
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : "N/A";
-            const div = document.createElement('div');
-            div.className = "log-item";
-            div.innerHTML = `<b>${date}</b><br>Q: ${data.question}`;
-            logList.appendChild(div);
-        });
+        setTimeout(() => {
+            table.classList.remove('shuffling');
+            table.innerHTML = ''; 
+            title.innerText = `${deckConfig.name} 카드 선택`;
+            desc.innerText = `직관적으로 ${deckConfig.pick}장을 선택해주세요.`;
+            
+            for(let i=0; i < deckConfig.count; i++) {
+                const card = document.createElement('div');
+                card.className = 'card fade-in';
+                card.dataset.index = i;
+                card.onclick = () => toggleCard(card, deckType, deckConfig.pick);
+                card.style.animationDelay = `${i * 0.005}s`;
+                table.appendChild(card);
+            }
+        }, 1000);
     }
 
-    window.showHistory = async () => {
-        if(!db) return alert("DB 연결 실패");
-        addMessage("📜 과거의 기록을 불러옵니다...", 'ai');
-        const q = query(collection(db, "tarot_readings"), orderBy("timestamp", "desc"), limit(3));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            addMessage(`[${new Date(data.timestamp?.toDate()).toLocaleDateString()}] <b>${data.question}</b><br><br>${data.cards}`, 'ai');
-        });
-    };
+    function toggleCard(cardEl, deckType, maxPick) {
+        const currentList = gameState.selectedIndices[deckType];
+        const index = parseInt(cardEl.dataset.index);
 
-    function addMessage(html, type) {
-        const box = document.getElementById('chat-box');
-        const div = document.createElement('div');
-        div.className = `msg ${type}`;
-        div.innerHTML = type === 'ai' ? marked.parse(html) : html;
-        box.appendChild(div);
-        box.scrollTop = box.scrollHeight;
+        if(cardEl.classList.contains('selected')) {
+            cardEl.classList.remove('selected');
+            const idx = currentList.indexOf(index);
+            if(idx > -1) currentList.splice(idx, 1);
+        } else {
+            if(currentList.length >= maxPick) return alert(`이 덱에서는 ${maxPick}장까지만 선택할 수 있습니다.`);
+            cardEl.classList.add('selected');
+            currentList.push(index);
+        }
+
+        const countSpan = document.getElementById('selection-count');
+        countSpan.innerText = `${currentList.length} / ${maxPick} 선택됨`;
+        
+        const nextBtn = document.getElementById('next-stage-btn');
+        if(currentList.length === maxPick) {
+            nextBtn.classList.remove('hidden');
+            countSpan.style.color = "green";
+        } else {
+            nextBtn.classList.add('hidden');
+            countSpan.style.color = "var(--accent-dark)";
+        }
     }
 
+    window.confirmSelection = () => {
+        startStage(gameState.stage + 1);
+    };
+
+    function finishGame() {
+        showView('result-view');
+        
+        const finalCards = {
+            waite: gameState.selectedIndices.waite.map(idx => FULL_LISTS.waite[idx % FULL_LISTS.waite.length] || "Card"),
+            belline: gameState.selectedIndices.belline.map(idx => FULL_LISTS.belline[idx % FULL_LISTS.belline.length] || "Card"),
+            lenormand: gameState.selectedIndices.lenormand.map(idx => FULL_LISTS.lenormand[idx % FULL_LISTS.lenormand.length] || "Card")
+        };
+
+        callGemini(finalCards);
+    }
+
+    // --- 2. Gemini API & 저장 ---
     async function callGemini(cards) {
-        addMessage("🎋 판다가 닝겐의 운명을 해석한다.....", 'ai');
-
+        const resultDiv = document.getElementById('ai-response-content');
+        
         const systemPrompt = `
-당신은 지금부터 전문 타로 리더입니다. 아래의 [규칙]과 [출력 포맷]을 엄격히 준수하여 사용자의 질문에 답하십시오.
+당신은 '대나무 숲의 현명한 판다' 타로 리더입니다.
+질문: "${gameState.question}"
+카드: 웨이트(${cards.waite}), 벨린(${cards.belline}), 레노먼드(${cards.lenormand})
 
-## 1. 기본 설정
-우리는 실제 오프라인 상담실에 있습니다.
-사용자는 이미 질문을 했고, 3개의 덱(유니버셜 웨이트, 호로스코프 벨린, 레노먼드)에서 숫자를 통해 카드를 모두 선택했습니다.
-**당신은 추가 질문을 하지 않고, 아래 전달받은 카드 목록을 바탕으로 즉시 리딩을 출력해야 합니다.**
-
-## 2. 카드 배치 및 역할
-* **1~4번 (메인 흐름):** 유니버셜 웨이트
-* **5~7번 (심리/조언):** 호로스코프 벨린
-* **8~10번 (구체적 사건):** 레노먼드
-
-## 3. 해석 원칙 (Tone & Manner)
-* **Dry & Cold:** 위로, 공감, 희망 고문은 절대 금지합니다.
-* **직설적 화법:** 부정적인 카드는 부정적으로, 위험은 위험으로 냉정하게 전달하십시오.
-* **유기적 스토리텔링:** "1번은 무엇, 2번은 무엇" 식의 나열을 금지합니다. 10장의 카드를 인과관계로 엮어 하나의 이야기로 서술하십시오.
-
-## 4. 출력 포맷 (엄격 준수)
-결과는 반드시 아래의 Markdown 형식을 따르십시오.
-
----
-### 🃏 [선택된 카드 리스트]
-
-| 순서 | 덱 종류 | **결과 카드명** |
-| :-- | :-- | :-- |
-| 1 | 유니버셜 웨이트 | **[카드명]** |
-| ... | ... | ... |
-| 10 | 레노먼드 | **[카드명]** |
-
----
-### 👁‍🗨 [심층 리딩]
-
-**⚠️ 서술형 리딩 작성 시 필수 규칙:**
-본문에서 카드를 언급할 때는 반드시 **한글명(영문명)** 형식으로 작성하고, 전체를 **Bold(\`**...**\`)** 처리하여 눈에 띄게 하십시오.
-(예: 상황이 좋게 시작되나 **검 3(Three of Swords)**가 나오면서...)
-
-#### 1. 핵심 흐름 및 방해 요소 (Weight 1~4번)
-*(웨이트 4장을 중심으로 현재 상황, 방해물, 흐름을 분석)*
-
-#### 2. 심리적 기저와 운기 (Belline 5~7번)
-*(질문자의 내면 심리와 외부 운기의 작용을 분석)*
-
-#### 3. 현실적 사건과 디테일 (Lenormand 8~10번)
-*(레노먼드 카드를 통해 발생할 구체적 사건, 인물, 타이밍 묘사)*
-
----
-### 🎯 [최종 결론 및 조언]
-* **요약:** (한 줄 요약)
-* **냉정한 조언:** (객관적이고 현실적인 행동 지침)
+**답변 형식(Markdown):**
+1. **[선택된 카드]**: 카드 목록
+2. **[판다의 해석]**:
+   - **현재(웨이트):** 흐름 분석
+   - **심리(벨린):** 내면/운기
+   - **미래(레노먼드):** 사건/시기
+3. **[대나무 숲의 조언]**: 냉철한 한 줄 조언.
 `;
-
-        const userContext = `
----
-[사용자 입력 데이터]
-**질문:** "${currentQuestion}"
-
-**선택된 카드 목록 (순서대로):**
-1. 유니버셜 웨이트 (1~4번): ${cards.waite.join(', ')}
-2. 호로스코프 벨린 (5~7번): ${cards.belline.join(', ')}
-3. 레노먼드 (8~10번): ${cards.lenormand.join(', ')}
-
-위 데이터를 바탕으로 지금 바로 해석을 시작하세요.
-`;
-
-        const finalPrompt = systemPrompt + userContext;
 
         try {
-            // gemini-3-pro-preview 모델 설정 유지
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`, {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+                body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
             });
 
             const data = await res.json();
-
-            // [에러 처리]
-            if (data.error) {
-                throw new Error(`API Error: ${data.error.message}`);
-            }
-            if (!data.candidates || data.candidates.length === 0) {
-                throw new Error("AI가 응답하지 않았습니다. (Safety Block 또는 알 수 없는 오류)");
-            }
-
-            const aiResponse = data.candidates[0].content.parts[0].text;
+            const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "해석을 불러오지 못했습니다.";
             
-            document.querySelector('.msg.ai:last-child').remove();
-            addMessage(aiResponse, 'ai');
+            resultDiv.innerHTML = marked.parse(aiText);
 
+            // Firebase 저장
             if(db) {
                 await addDoc(collection(db, "tarot_readings"), {
-                    question: currentQuestion,
-                    cards: `W: ${cards.waite} / B: ${cards.belline} / L: ${cards.lenormand}`,
-                    response: aiResponse,
+                    question: gameState.question,
+                    response: aiText,
                     timestamp: new Date()
                 });
             }
 
         } catch (err) {
-            document.querySelector('.msg.ai:last-child').remove();
-            console.error(err);
-            addMessage(`⛔ <b>오류가 발생했습니다.</b><br>원인: ${err.message}<br><br>API 키를 다시 확인하거나 잠시 후 시도해주세요.`, 'ai');
+            resultDiv.innerHTML = `⚠️ 오류: ${err.message}`;
         }
     }
+
+    // --- 3. 과거 기록 로직 ---
+    window.loadHistory = async () => {
+        showView('history-view');
+        const listEl = document.getElementById('history-list');
+        listEl.innerHTML = '<p style="text-align:center; color:#666;">데이터를 불러오는 중...</p>';
+
+        if(!db) { listEl.innerHTML = "DB 연결 실패"; return; }
+
+        try {
+            const q = query(collection(db, "tarot_readings"), orderBy("timestamp", "desc"), limit(20));
+            const snapshot = await getDocs(q);
+            
+            listEl.innerHTML = "";
+            if(snapshot.empty) {
+                listEl.innerHTML = '<p style="text-align:center;">기록이 없습니다.</p>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : "날짜 없음";
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="h-date">${date}</div>
+                    <div class="h-q">Q. ${data.question}</div>
+                    <div class="h-preview">${data.response.replace(/<[^>]*>/g, '').substring(0, 40)}...</div>
+                `;
+                div.onclick = () => {
+                    alert(`[질문] ${data.question}\n\n[결과 요약]\n${data.response.replace(/<[^>]*>/g, '').substring(0, 300)}...`);
+                };
+                listEl.appendChild(div);
+            });
+        } catch(e) {
+            listEl.innerHTML = `오류 발생: ${e.message}`;
+        }
+    };
+
+    // --- 4. 관리자 기능 ---
+    window.checkAdmin = () => {
+        const pw = prompt("관리자 암호를 입력하세요:");
+        if(pw === "5690") {
+            showView('admin-view');
+            // 입력창 채우기
+            document.getElementById('admin-title-input').value = document.getElementById('main-title').innerText;
+            document.getElementById('admin-subtitle-input').value = document.getElementById('main-subtitle').innerText;
+            
+            let currentBg = document.getElementById('main-mascot').style.backgroundImage;
+            let cleanUrl = currentBg.replace(/^url\(['"](.+)['"]\)$/, '$1');
+            if(!cleanUrl || cleanUrl === 'none') cleanUrl = "./panda.png";
+            
+            document.getElementById('admin-img-input').value = cleanUrl;
+            document.getElementById('admin-img-preview').src = cleanUrl;
+        } else if(pw !== null) {
+            alert("암호가 틀렸습니다.");
+        }
+    };
+
+    window.previewAdminImg = () => {
+        const url = document.getElementById('admin-img-input').value;
+        document.getElementById('admin-img-preview').src = url || "./panda.png";
+    };
+
+    window.saveAdminSettings = async () => {
+        if(!db) return alert("DB 연결 오류: 로컬 파일(file://)이 아닌 Live Server로 실행 중인지 확인하세요.");
+        
+        const btn = document.getElementById('admin-save-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ 저장 중...";
+        btn.disabled = true;
+
+        const newTitle = document.getElementById('admin-title-input').value;
+        const newSubtitle = document.getElementById('admin-subtitle-input').value;
+        const newImg = document.getElementById('admin-img-input').value || "./panda.png";
+
+        try {
+            await setDoc(doc(db, "settings", "config"), {
+                title: newTitle,
+                subtitle: newSubtitle,
+                imgUrl: newImg
+            }, { merge: true });
+
+            // 즉시 반영 후 자동 나가기
+            applyConfig(newTitle, newSubtitle, newImg);
+            showView('start-view');
+            
+        } catch(e) {
+            alert("⚠️ 저장 실패!\n원인: " + e.message + "\n\n(Firebase Console > Firestore Database > Rules 탭에서 읽기/쓰기 권한을 허용했는지 확인하세요.)");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    };
+
+    // 설정 적용 함수
+    async function loadAdminConfig() {
+        if(!db) return;
+        try {
+            const docSnap = await getDoc(doc(db, "settings", "config"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                applyConfig(data.title, data.subtitle, data.imgUrl);
+            }
+        } catch(e) { console.log("설정 로드 실패:", e); }
+    }
+
+    function applyConfig(title, subtitle, imgUrl) {
+        if(title) {
+            document.getElementById('main-title').innerText = title;
+            document.getElementById('app-title-text').innerText = "🎋 " + title; 
+        }
+        if(subtitle) document.getElementById('main-subtitle').innerText = subtitle;
+        if(imgUrl) {
+            const url = `url('${imgUrl}')`;
+            document.getElementById('main-mascot').style.backgroundImage = url;
+            document.getElementById('result-mascot').style.backgroundImage = url;
+        }
+    }
+
+    window.copyResult = () => {
+        const text = document.getElementById('ai-response-content').innerText;
+        navigator.clipboard.writeText(text).then(() => alert("복사 완료!"));
+    };
+
 </script>
 </body>
 </html>

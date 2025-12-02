@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HG AI Agents</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* --- [테마 정의: 대나무 판다 컨셉] --- */
+        :root {
+            --bg-main: #e9f5ec;       
+            --panel-bg: #ffffff;      
+            --accent-dark: #2d5a27;   
+            --accent-light: #81c784;  
+            --text-primary: #1b3318;  
+            --msg-ai-bg: #f1f8e9;     
+            --msg-user-bg: #43a047;   
+            --error-color: #e57373;
+        }
+
+        body {
+            font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            background: var(--bg-main);
+            /* 모눈종이 패턴 */
+            background-image: linear-gradient(0deg, transparent 24%, rgba(129, 199, 132, 0.1) 25%, rgba(129, 199, 132, 0.1) 26%, transparent 27%, transparent 74%, rgba(129, 199, 132, 0.1) 75%, rgba(129, 199, 132, 0.1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(129, 199, 132, 0.1) 25%, rgba(129, 199, 132, 0.1) 26%, transparent 27%, transparent 74%, rgba(129, 199, 132, 0.1) 75%, rgba(129, 199, 132, 0.1) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* [추가] 왼쪽 대나무 숲 */
+        .bamboo-bg.left {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 30vw; /* 화면 너비의 30% 차지 */
+            height: 50vh; /* 화면 높이의 50% 차지 */
+            background-image: url('https://images.unsplash.com/photo-1596323606046-a192809633e1?q=80&w=600&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            z-index: -1;
+            /* 위쪽 자연스럽게 페이드 아웃 */
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        }
+
+        /* [추가] 오른쪽 대나무 숲 */
+        .bamboo-bg.right {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 30vw;
+            height: 50vh;
+            background-image: url('https://images.unsplash.com/photo-1515523916629-688755d496e5?q=80&w=600&auto=format&fit=crop');
+            background-size: cover;
+            background-position: left bottom;
+            background-repeat: no-repeat;
+            z-index: -1;
+            /* 위쪽 자연스럽게 페이드 아웃 */
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        }
+
+        /* 모바일 대응: 화면 좁으면 대나무 숨김 (채팅 방해 방지) */
+        @media (max-width: 800px) {
+            .bamboo-bg { opacity: 0.3; width: 40vw; } /* 살짝만 보이게 */
+        }
+
+        #app {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            position: relative;
+            box-shadow: 0 10px 25px rgba(45, 90, 39, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 10px;
+            border: 2px solid var(--accent-light);
+            z-index: 1; 
+        }
+
+        /* 헤더바 */
+        .header-bar {
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: var(--accent-dark);
+            color: white;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 관리자 아이콘 */
+        .admin-icon {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .admin-icon:hover { opacity: 1; transform: rotate(90deg); transition: 0.3s; }
+
+        /* 채팅창 */
+        #chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #fff;
+        }
+        .msg {
+            max-width: 85%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .msg.ai {
+            align-self: flex-start;
+            background: var(--msg-ai-bg);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--accent-light);
+        }
+        .msg.ai::before { content: '🐼'; margin-right: 8px; }
+
+        .msg.user {
+            align-self: flex-end;
+            background: var(--msg-user-bg);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* 입력창 영역 */
+        #input-area {
+            padding: 15px;
+            background: var(--bg-main);
+            border-top: 2px solid var(--accent-light);
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid var(--accent-light);
+            color: var(--text-primary);
+            border-radius: 25px;
+            outline: none;
+        }
+        button {
+            padding: 10px 24px;
+            background: var(--accent-dark);
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: background 0.2s;
+        }
+        button:hover { background: #3d7c36; }
+
+        /* --- [모달 공통 디자인] --- */
+        .modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            z-index: 10;
+            padding-top: 20px;
+            overflow-y: auto;
+        }
+        .hidden { display: none !important; }
+        
+        .number-form {
+            width: 90%;
+            max-width: 400px;
+            padding-bottom: 50px;
+        }
+        
+        .deck-section {
+            background: #f1f8e9;
+            border: 1px solid var(--accent-light);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .deck-section h3 {
+            margin: 0 0 10px 0;
+            color: var(--accent-dark);
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .deck-section span { font-size: 0.8rem; color: #666; font-weight: normal; }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .input-item { display: flex; flex-direction: column; align-items: center; }
+        .input-item label { font-size: 0.75rem; color: var(--accent-dark); margin-bottom: 4px; font-weight: bold; }
+        
+        .num-input {
+            width: 100%;
+            padding: 8px 0;
+            text-align: center;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        .num-input:focus { border-color: var(--msg-user-bg); background: #e8f5e9; }
+        .num-input.error { border-color: var(--error-color); background: #ffebee; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+            background: var(--accent-dark);
+            box-shadow: 0 4px 10px rgba(45, 90, 39, 0.3);
+            color: white; border: none; border-radius: 8px; cursor: pointer;
+        }
+        .close-btn {
+            width: 100%; background: #ccc; color: #333; margin-top:10px; padding: 10px; border:none; border-radius:8px; cursor: pointer;
+        }
+
+        /* 기록/관리자 버튼 스타일 */
+        .top-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        #history-btn { left: 15px; }
+        
+        /* 관리자 모니터링 스타일 */
+        .admin-stat-box {
+            background: #fff;
+            border: 2px solid var(--accent-dark);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            width: 90%;
+            text-align: left;
+        }
+        .log-item {
+            font-size: 0.85rem;
+            border-bottom: 1px solid #eee;
+            padding: 8px 0;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f8e9; }
+        ::-webkit-scrollbar-thumb { background: #a5d6a7; border-radius: 4px; }
+
+    </style>
+</head>
+<body>
+
+<div class="bamboo-bg left"></div>
+<div class="bamboo-bg right"></div>
+
+<div id="app">
+    <div class="header-bar">
+        <button id="history-btn" class="top-btn" onclick="showHistory()">기록</button>
+        🎋 대나무 타로 🎋
+        <span class="admin-icon" onclick="openAdminCheck()">⚙️</span>
+    </div>
+    <div id="chat-box">
+        <div class="msg ai">어서오세요! <br>궁금한 사항을 낸나!</div>
+    </div>
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="고민을 입력하세요..." onkeypress="if(event.key==='Enter') openNumberModal()">
+        <button onclick="openNumberModal()">시작</button>
+    </div>
+
+    <div id="number-modal" class="modal hidden">
+        <h2 style="color:var(--accent-dark); margin-bottom:5px;">카드 선택</h2>
+        <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">각 덱의 범위 내 숫자를 입력하세요.</p>
+
+        <div class="number-form">
+            <div class="deck-section">
+                <h3>Universal Waite <span>(1~78)</span></h3>
+                <div class="input-grid">
+                    <div class="input-item"><label>1.현재</label><input type="number" class="num-input waite" placeholder="선택"></div>
+                    <div class="input-item"><label>2.장애</label><input type="number" class="num-input waite" placeholder="선택"></div>
+                    <div class="input-item"><label>3.과정</label><input type="number" class="num-input waite" placeholder="선택"></div>
+                    <div class="input-item"><label>4.결과</label><input type="number" class="num-input waite" placeholder="선택"></div>
+                </div>
+            </div>
+
+            <div class="deck-section">
+                <h3>Horoscope Belline <span>(1~53)</span></h3>
+                <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="input-item"><label>5.조언1</label><input type="number" class="num-input belline" placeholder="선택"></div>
+                    <div class="input-item"><label>6.조언2</label><input type="number" class="num-input belline" placeholder="선택"></div>
+                    <div class="input-item"><label>7.조언3</label><input type="number" class="num-input belline" placeholder="선택"></div>
+                </div>
+            </div>
+
+            <div class="deck-section">
+                <h3>Lenormand <span>(1~36)</span></h3>
+                <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="input-item"><label>8.사건1</label><input type="number" class="num-input lenormand" placeholder="선택"></div>
+                    <div class="input-item"><label>9.사건2</label><input type="number" class="num-input lenormand" placeholder="선택"></div>
+                    <div class="input-item"><label>10.사건3</label><input type="number" class="num-input lenormand" placeholder="선택"></div>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="processNumbers()">결과 보기</button>
+            <button class="close-btn" onclick="closeModal('number-modal')">취소</button>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal hidden">
+        <h2 style="color:var(--accent-dark);">🔧 관리자 모니터링</h2>
+        <div class="admin-stat-box">
+            <h4>📊 API / DB 상태</h4>
+            <p>API Key Status: <span style="color:green; font-weight:bold;">Active</span></p>
+            <p>누적 상담 건수: <span id="total-count" style="font-weight:bold;">Loading...</span>건</p>
+        </div>
+        
+        <div class="admin-stat-box" style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+            <h4>📜 최근 요청 로그 (Last 10)</h4>
+            <div id="log-list" style="overflow-y:auto; flex:1;">
+                </div>
+        </div>
+        <button class="close-btn" style="width:90%; margin-bottom:20px;" onclick="closeModal('admin-modal')">닫기</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, getCountFromServer } 
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDuQDOi5wxabpqdqu-CJfdR-krk5Q08tBA",
+        authDomain: "test-9da10.firebaseapp.com",
+        projectId: "test-9da10",
+        storageBucket: "test-9da10.firebasestorage.app",
+        messagingSenderId: "578765851412",
+        appId: "1:578765851412:web:5d9d30e09f8427d1a49001",
+        measurementId: "G-LBY6NM2VGQ"
+    };
+   
+    let db;
+    try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        console.log("🔥 Firebase Connected!");
+    } catch(e) {
+        console.error("Firebase 설정 오류", e);
+    }
+
+    const DECKS = {
+        waite: ["The Fool","The Magician","High Priestess","Empress","Emperor","Hierophant","Lovers","Chariot","Strength","Hermit","Wheel of Fortune","Justice","Hanged Man","Death","Temperance","Devil","Tower","Star","Moon","Sun","Judgement","World","Ace of Wands","Two of Wands","Three of Wands","Four of Wands","Five of Wands","Six of Wands","Seven of Wands","Eight of Wands","Nine of Wands","Ten of Wands","Page of Wands","Knight of Wands","Queen of Wands","King of Wands","Ace of Cups","King of Cups","Ace of Swords","King of Swords","Ace of Pentacles","King of Pentacles"],
+        belline: ["Destiny","Success","Loss","Traffic","Union","Family","Amor","Sickness","Treachery","Money","Pleasure","Peace","Gifts","Discovery","Water","Fire","Island","Delayed","Ruins","Table"],
+        lenormand: ["Rider","Clover","Ship","House","Tree","Clouds","Snake","Coffin","Bouquet","Scythe","Whip","Birds","Child","Fox","Bear","Stars","Stork","Dog","Tower","Garden","Mountain","Crossroad","Mice","Heart","Ring","Book","Letter","Man","Woman","Lily","Sun","Moon","Key","Fish","Anchor","Cross"]
+    };
+
+    let currentQuestion = "";
+    // ★ 주의: 실제 본인의 유효한 API 키인지 꼭 확인하세요!
+    let apiKey = "AIzaSyB5ax1Xxo8nZo8fhZJXDYMOS5Ctkam_fxk"; 
+
+    window.openNumberModal = () => {
+        const input = document.getElementById('user-input');
+        if(!input.value.trim()) return alert("질문을 먼저 입력해주세요!");
+        
+        currentQuestion = input.value;
+        addMessage(currentQuestion, 'user');
+        input.value = '';
+
+        document.getElementById('number-modal').classList.remove('hidden');
+        document.querySelectorAll('.num-input').forEach(el => {
+            el.value = '';
+            el.classList.remove('error');
+        });
+    };
+
+    window.closeModal = (id) => {
+        document.getElementById(id).classList.add('hidden');
+    };
+
+    // [수정] 입력값 검증 로직 강화 (범위 체크)
+    window.processNumbers = () => {
+        // 1. 입력값 수집
+        const wInputs = document.querySelectorAll('.waite');
+        const bInputs = document.querySelectorAll('.belline');
+        const lInputs = document.querySelectorAll('.lenormand');
+        
+        // 2. 유효성 검사 (Mandatory & Range Check)
+        let errorMsg = "";
+        let hasError = false;
+
+        const validate = (inputs, max, name) => {
+            inputs.forEach(input => {
+                const val = parseInt(input.value);
+                if(!input.value || isNaN(val)) {
+                    input.classList.add('error');
+                    hasError = true;
+                } else if (val < 1 || val > max) {
+                    input.classList.add('error');
+                    hasError = true;
+                    if(!errorMsg.includes(name)) errorMsg += `[${name}] 1~${max} 사이여야 합니다.\n`;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+        };
+
+        validate(wInputs, 78, "유니버셜 웨이트");
+        validate(bInputs, 53, "호로스코프 벨린");
+        validate(lInputs, 36, "레노먼드");
+
+        if(hasError) {
+            return alert(errorMsg || "모든 칸에 올바른 숫자를 입력해주세요!");
+        }
+
+        // 3. 숫자를 카드로 변환 (Modulo 로직 유지하되, 입력은 범위내로 제한됨)
+        const getCard = (val, list) => {
+            const num = parseInt(val);
+            if(isNaN(num) || num < 1) return list[0]; 
+            return list[(num - 1) % list.length];
+        };
+
+        const selectedCards = {
+            waite: Array.from(wInputs).map(i => getCard(i.value, DECKS.waite)),
+            belline: Array.from(bInputs).map(i => getCard(i.value, DECKS.belline)),
+            lenormand: Array.from(lInputs).map(i => getCard(i.value, DECKS.lenormand))
+        };
+
+        closeModal('number-modal');
+        callGemini(selectedCards);
+    };
+
+    // [추가] 관리자 접속 체크
+    window.openAdminCheck = () => {
+        const pw = prompt("관리자 암호를 입력하세요:");
+        if(pw === "5690") {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            loadAdminStats();
+        } else if (pw !== null) {
+            alert("암호가 올바르지 않습니다.");
+        }
+    };
+
+    // [추가] 관리자 통계 로드
+    async function loadAdminStats() {
+        if(!db) return;
+        const countSpan = document.getElementById('total-count');
+        const logList = document.getElementById('log-list');
+        
+        // 1. 총 개수 (Firestore 집계 쿼리는 비용 발생하므로 단순히 최근 로그 가져오기로 대체하거나 실제 구현)
+        // 여기서는 최근 10개만 가져오고 개수는 스냅샷 사이즈로 예시
+        const q = query(collection(db, "tarot_readings"), orderBy("timestamp", "desc"), limit(20));
+        const snapshot = await getDocs(q);
+        
+        countSpan.innerText = snapshot.size + "+ (Recent)"; 
+        
+        logList.innerHTML = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : "N/A";
+            const div = document.createElement('div');
+            div.className = "log-item";
+            div.innerHTML = `<b>${date}</b><br>Q: ${data.question}`;
+            logList.appendChild(div);
+        });
+    }
+
+    window.showHistory = async () => {
+        if(!db) return alert("DB 연결 실패");
+        addMessage("📜 과거의 기록을 불러옵니다...", 'ai');
+        const q = query(collection(db, "tarot_readings"), orderBy("timestamp", "desc"), limit(3));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            addMessage(`[${new Date(data.timestamp?.toDate()).toLocaleDateString()}] <b>${data.question}</b><br><br>${data.cards}`, 'ai');
+        });
+    };
+
+    function addMessage(html, type) {
+        const box = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerHTML = type === 'ai' ? marked.parse(html) : html;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    async function callGemini(cards) {
+        addMessage("🎋 판다가 닝겐의 운명을 해석한다.....", 'ai');
+
+        const systemPrompt = `
+당신은 지금부터 전문 타로 리더입니다. 아래의 [규칙]과 [출력 포맷]을 엄격히 준수하여 사용자의 질문에 답하십시오.
+
+## 1. 기본 설정
+우리는 실제 오프라인 상담실에 있습니다.
+사용자는 이미 질문을 했고, 3개의 덱(유니버셜 웨이트, 호로스코프 벨린, 레노먼드)에서 숫자를 통해 카드를 모두 선택했습니다.
+**당신은 추가 질문을 하지 않고, 아래 전달받은 카드 목록을 바탕으로 즉시 리딩을 출력해야 합니다.**
+
+## 2. 카드 배치 및 역할
+* **1~4번 (메인 흐름):** 유니버셜 웨이트
+* **5~7번 (심리/조언):** 호로스코프 벨린
+* **8~10번 (구체적 사건):** 레노먼드
+
+## 3. 해석 원칙 (Tone & Manner)
+* **Dry & Cold:** 위로, 공감, 희망 고문은 절대 금지합니다.
+* **직설적 화법:** 부정적인 카드는 부정적으로, 위험은 위험으로 냉정하게 전달하십시오.
+* **유기적 스토리텔링:** "1번은 무엇, 2번은 무엇" 식의 나열을 금지합니다. 10장의 카드를 인과관계로 엮어 하나의 이야기로 서술하십시오.
+
+## 4. 출력 포맷 (엄격 준수)
+결과는 반드시 아래의 Markdown 형식을 따르십시오.
+
+---
+### 🃏 [선택된 카드 리스트]
+
+| 순서 | 덱 종류 | **결과 카드명** |
+| :-- | :-- | :-- |
+| 1 | 유니버셜 웨이트 | **[카드명]** |
+| ... | ... | ... |
+| 10 | 레노먼드 | **[카드명]** |
+
+---
+### 👁‍🗨 [심층 리딩]
+
+**⚠️ 서술형 리딩 작성 시 필수 규칙:**
+본문에서 카드를 언급할 때는 반드시 **한글명(영문명)** 형식으로 작성하고, 전체를 **Bold(\`**...**\`)** 처리하여 눈에 띄게 하십시오.
+(예: 상황이 좋게 시작되나 **검 3(Three of Swords)**가 나오면서...)
+
+#### 1. 핵심 흐름 및 방해 요소 (Weight 1~4번)
+*(웨이트 4장을 중심으로 현재 상황, 방해물, 흐름을 분석)*
+
+#### 2. 심리적 기저와 운기 (Belline 5~7번)
+*(질문자의 내면 심리와 외부 운기의 작용을 분석)*
+
+#### 3. 현실적 사건과 디테일 (Lenormand 8~10번)
+*(레노먼드 카드를 통해 발생할 구체적 사건, 인물, 타이밍 묘사)*
+
+---
+### 🎯 [최종 결론 및 조언]
+* **요약:** (한 줄 요약)
+* **냉정한 조언:** (객관적이고 현실적인 행동 지침)
+`;
+
+        const userContext = `
+---
+[사용자 입력 데이터]
+**질문:** "${currentQuestion}"
+
+**선택된 카드 목록 (순서대로):**
+1. 유니버셜 웨이트 (1~4번): ${cards.waite.join(', ')}
+2. 호로스코프 벨린 (5~7번): ${cards.belline.join(', ')}
+3. 레노먼드 (8~10번): ${cards.lenormand.join(', ')}
+
+위 데이터를 바탕으로 지금 바로 해석을 시작하세요.
+`;
+
+        const finalPrompt = systemPrompt + userContext;
+
+        try {
+            // gemini-3-pro-preview 모델 설정 유지
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+            });
+
+            const data = await res.json();
+
+            // [에러 처리]
+            if (data.error) {
+                throw new Error(`API Error: ${data.error.message}`);
+            }
+            if (!data.candidates || data.candidates.length === 0) {
+                throw new Error("AI가 응답하지 않았습니다. (Safety Block 또는 알 수 없는 오류)");
+            }
+
+            const aiResponse = data.candidates[0].content.parts[0].text;
+            
+            document.querySelector('.msg.ai:last-child').remove();
+            addMessage(aiResponse, 'ai');
+
+            if(db) {
+                await addDoc(collection(db, "tarot_readings"), {
+                    question: currentQuestion,
+                    cards: `W: ${cards.waite} / B: ${cards.belline} / L: ${cards.lenormand}`,
+                    response: aiResponse,
+                    timestamp: new Date()
+                });
+            }
+
+        } catch (err) {
+            document.querySelector('.msg.ai:last-child').remove();
+            console.error(err);
+            addMessage(`⛔ <b>오류가 발생했습니다.</b><br>원인: ${err.message}<br><br>API 키를 다시 확인하거나 잠시 후 시도해주세요.`, 'ai');
+        }
+    }
+</script>
+</body>
+</html>

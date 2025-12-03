@@ -52,67 +52,56 @@
         @media (max-width: 768px) { .char-img { width: 140px; height: 140px; } .title-badge { font-size: 1.8rem; } .split-panel:hover { z-index: 10; clip-path: inherit; } .panel-left:hover { clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); } .panel-right:hover { clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); } }
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
 
-        /* --- [NEW] 타로 카드 셔플 및 펼치기 스타일 --- */
+        /* --- [타로 카드 & 셔플] --- */
         #tarot-card-table {
             display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start;
-            gap: 8px; padding: 20px; perspective: 1000px;
+            gap: 5px; padding: 10px; perspective: 1000px;
         }
         
         .tarot-card-face {
-            width: 55px; height: 85px;
-            /* 기본: 웨이트 (보라색 계열) */
-            background: radial-gradient(circle at center, #673ab7 0%, #311b92 100%);
-            border: 2px solid #b39ddb;
-            border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            width: 45px; height: 75px; /* 많이 보여야 해서 조금 줄임 */
+            background: #2e7d32;
+            border: 1px solid #a5d6a7; border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             display: flex; justify-content: center; align-items: center;
             font-size: 1.2rem; cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-            position: relative;
+            transition: transform 0.2s; position: relative;
         }
-        /* 덱별 색상 */
-        .deck-waite { background: radial-gradient(circle, #7e57c2 0%, #4527a0 100%); }
-        .deck-belline { background: radial-gradient(circle, #1e88e5 0%, #0d47a1 100%); border-color: #90caf9; }
-        .deck-lenormand { background: radial-gradient(circle, #8d6e63 0%, #4e342e 100%); border-color: #bcaaa4; }
+        .tarot-card-face::after { content: '🎋'; opacity: 0.6; }
+        
+        /* 덱별 색상 테마 */
+        .deck-waite .tarot-card-face { background: #673ab7; border-color: #b39ddb; } /* 보라 */
+        .deck-belline .tarot-card-face { background: #1565c0; border-color: #90caf9; } /* 파랑 */
+        .deck-lenormand .tarot-card-face { background: #4e342e; border-color: #bcaaa4; } /* 갈색 */
 
-        .tarot-card-face::after { content: '🎋'; opacity: 0.8; }
-        .tarot-card-face::before { content: ''; position: absolute; inset: 3px; border: 1px dashed rgba(255,255,255,0.3); border-radius: 4px; }
-
-        .tarot-card-face:hover { transform: translateY(-10px) scale(1.1); z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .tarot-card-face:hover { transform: translateY(-15px) scale(1.1); z-index: 50; }
         
         .card-selected {
-            background: radial-gradient(circle at center, #ffd54f 0%, #ff6f00 100%) !important;
-            border-color: #fff !important;
-            transform: translateY(-15px) scale(1.15) !important;
+            background: #ffd54f !important; border-color: #fff !important;
+            transform: translateY(-20px) scale(1.15) !important;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.8) !important;
-            z-index: 20;
+            z-index: 60;
         }
         .card-selected::after { content: '✨'; }
 
-        /* 셔플 애니메이션 뷰 */
-        #tarot-shuffle-view {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;
+        /* 셔플 뷰 */
+        #tarot-shuffle-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        .shuffle-deck { position: relative; width: 100px; height: 150px; }
+        .s-card { 
+            position: absolute; width: 100%; height: 100%; border-radius: 8px; border: 2px solid #fff;
+            background: #2e7d32; display: flex; justify-content: center; align-items: center; font-size: 2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        .deck-stack { position: relative; width: 120px; height: 180px; }
-        .deck-card {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #2e7d32; border: 4px solid #fff; border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: flex; justify-content: center; align-items: center; font-size: 3rem;
-        }
-        .deck-card::after { content: '🎋'; }
+        .s-card::after { content: '🎋'; }
         
-        /* 쉐킷쉐킷 애니메이션 */
-        .shuffling .deck-card:nth-child(1) { animation: shuffleMove 0.5s infinite alternate; }
-        .shuffling .deck-card:nth-child(2) { animation: shuffleMove 0.5s infinite alternate-reverse 0.1s; }
-        .shuffling .deck-card:nth-child(3) { animation: shuffleMove 0.5s infinite alternate 0.2s; }
-
-        @keyframes shuffleMove {
-            0% { transform: translateX(0) rotate(0); }
-            25% { transform: translateX(-20px) rotate(-5deg); }
-            75% { transform: translateX(20px) rotate(5deg); }
-            100% { transform: translateX(0) rotate(0); }
-        }
+        /* 셔플 애니메이션 */
+        .shaking .s-card:nth-child(1) { animation: mix1 0.8s infinite; }
+        .shaking .s-card:nth-child(2) { animation: mix2 0.8s infinite; }
+        .shaking .s-card:nth-child(3) { animation: mix3 0.8s infinite; }
+        
+        @keyframes mix1 { 0% { transform: translateX(0); } 50% { transform: translateX(-40px) rotate(-10deg); } 100% { transform: translateX(0); } }
+        @keyframes mix2 { 0% { transform: translateX(0); } 50% { transform: translateX(40px) rotate(10deg); } 100% { transform: translateX(0); } }
+        @keyframes mix3 { 0% { transform: translateY(0); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0); } }
 
     </style>
 </head>
@@ -128,7 +117,7 @@
             <input type="password" id="login-api-key" class="maple-input" placeholder="암호 입력">
             <button onclick="attemptLogin()" class="maple-btn">로그인</button>
         </div>
-        <div class="absolute bottom-2 right-2 text-white/40 text-[10px] font-sans font-bold z-20">v1.0.5</div>
+        <div class="absolute bottom-2 right-2 text-white/40 text-[10px] font-sans font-bold z-20">v1.0.6</div>
     </div>
 
     <div id="selection-screen" class="hidden">
@@ -162,21 +151,20 @@
             </div>
 
             <div id="tarot-shuffle-view" class="hidden">
-                <div class="deck-stack shuffling mb-8">
-                    <div class="deck-card"></div><div class="deck-card"></div><div class="deck-card"></div>
+                <div class="shuffle-deck shaking mb-6">
+                    <div class="s-card"></div><div class="s-card"></div><div class="s-card"></div>
                 </div>
-                <h3 id="shuffle-text" class="text-2xl font-bold text-green-800 animate-pulse">카드를 섞는 중...</h3>
-                <p class="text-sm text-green-600 mt-2">마음을 차분히 하세요.</p>
+                <h3 id="shuffle-msg" class="text-2xl font-bold text-green-800 animate-pulse">카드 섞는 중...</h3>
             </div>
 
             <div id="tarot-view-game" class="hidden h-full flex flex-col">
-                <div class="bg-green-100 p-3 text-center rounded-lg mb-4 shadow-inner">
-                    <h3 id="tarot-stage-title" class="font-bold text-green-800 text-xl">카드 선택</h3>
-                    <p id="tarot-stage-desc" class="text-sm text-green-600">직관적으로 카드를 고르세요.</p>
+                <div class="bg-green-100 p-3 text-center rounded-lg mb-2 shadow-sm">
+                    <h3 id="tarot-stage-title" class="font-bold text-green-800 text-lg">카드 선택</h3>
+                    <p id="tarot-stage-desc" class="text-xs text-green-600">직관적으로 카드를 고르세요.</p>
                 </div>
                 <div id="tarot-card-table" class="flex-1 overflow-y-auto content-start"></div>
-                <div class="mt-4 text-center pb-4">
-                    <div id="tarot-selection-count" class="font-bold text-green-800 mb-2">0 / 0</div>
+                <div class="mt-2 text-center pb-4">
+                    <div id="tarot-selection-count" class="font-bold text-green-800 mb-2 text-sm">0 / 0</div>
                     <button id="tarot-next-btn" class="action-btn bg-green-600 text-white w-full hidden shadow-lg" onclick="confirmTarotSelection()">다음 단계</button>
                 </div>
             </div>
@@ -207,12 +195,14 @@
         </div>
 
         <div id="common-view-loading" class="hidden absolute inset-0 bg-white/95 z-50 flex flex-col items-center justify-center text-center p-6"><img id="loading-img" src="" class="w-24 h-24 rounded-full mb-6 animate-bounce border-4 border-gray-300 bg-white"><p id="loading-text" class="text-xl font-bold text-gray-700 animate-pulse">분석 중...</p></div>
+        
         <div id="common-view-result" class="hidden absolute inset-0 bg-white z-40 flex flex-col p-4 overflow-y-auto">
             <div class="text-right mb-4"><button onclick="resetCurrentMode()" class="text-sm text-gray-500 underline font-bold">처음으로</button></div>
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4"><span class="font-bold text-gray-600">Q.</span> <span id="result-question" class="font-bold">질문</span></div>
             <div class="flex-1 bg-white border-2 border-dashed border-gray-300 rounded-xl p-5 relative overflow-y-auto shadow-sm"><button onclick="copyResult()" class="absolute top-2 right-2 text-xs bg-gray-100 px-2 py-1 rounded border">복사</button><div id="result-content" class="markdown-body text-sm leading-7 text-gray-800"></div></div>
             <button class="action-btn bg-gray-800 text-white w-full mt-4" onclick="resetCurrentMode()">다른 질문하기</button>
         </div>
+
         <div id="common-view-history" class="hidden absolute inset-0 bg-white z-50 flex flex-col p-4"><h3 class="text-center font-bold text-xl mb-4 text-gray-800">상담 기록</h3><div id="history-list" class="flex-1 overflow-y-auto space-y-3 p-2"></div><button class="w-full p-3 bg-gray-200 rounded-xl font-bold mt-4 text-gray-700" onclick="document.getElementById('common-view-history').classList.add('hidden')">닫기</button></div>
     </div>
 
@@ -311,6 +301,7 @@
     async function callGemini(prompt, isJson = false) {
         if (!userApiKey) { alert("인증 필요"); location.reload(); return; }
         
+        // [수정] 모델명 고정
         let modelName = 'gemini-2.5-flash'; 
         if (currentModelMode === 'best') modelName = 'gemini-3-pro-preview';
 
@@ -322,22 +313,21 @@
             
             if(data.error) {
                 if(data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT') {
-                    alert(`API 오류: ${data.error.message}\n(요청한 모델: ${modelName})`);
+                    alert(`API 오류: ${data.error.message}\n(모델: ${modelName})`);
                     return; 
                 }
                 throw new Error(data.error.message);
             }
             return data.candidates[0].content.parts[0].text;
-        } catch (e) { 
-            alert("오류: " + e.message); throw e;
-        }
+        } catch (e) { alert("오류: " + e.message); throw e; }
     }
 
-    // --- Tarot (Flow & Shuffle Logic) ---
+    // --- Tarot Flow (Enhanced) ---
+    // [1] 실제 덱 구성 (전체 카드 수)
     const TAROT_STAGES = [
-        { key: 'waite', name: '유니버셜 웨이트', pick: 4, color: 'deck-waite' },
-        { key: 'belline', name: '호로스코프 벨린', pick: 3, color: 'deck-belline' },
-        { key: 'lenormand', name: '레노먼드', pick: 3, color: 'deck-lenormand' }
+        { key: 'waite', name: '유니버셜 웨이트', count: 78, pick: 4, style: 'deck-waite' },
+        { key: 'belline', name: '호로스코프 벨린', count: 53, pick: 3, style: 'deck-belline' },
+        { key: 'lenormand', name: '레노먼드', count: 36, pick: 3, style: 'deck-lenormand' }
     ];
 
     window.startTarotFlow = () => {
@@ -345,26 +335,25 @@
         if(!q.trim()) return alert("질문을 입력하세요!");
         gameState.question = q;
         gameState.selections = { waite: [], belline: [], lenormand: [] };
-        
-        // 1단계 시작
-        startTarotStage(0);
+        // 1단계 진입
+        processStage(0);
     };
 
-    function startTarotStage(idx) {
+    function processStage(idx) {
         gameState.stage = idx;
         if(idx >= TAROT_STAGES.length) { finishTarot(); return; }
         
         const config = TAROT_STAGES[idx];
         
-        // 1. 셔플 애니메이션 보여주기
+        // 1. 셔플 화면 보여주기 (1초)
         showView('tarot-shuffle-view');
-        document.getElementById('shuffle-text').innerText = `${config.name} 섞는 중...`;
+        document.getElementById('shuffle-msg').innerText = `${config.name} 섞는 중...`;
         
-        // 2초 후 카드 펼치기
         setTimeout(() => {
+            // 2. 카드 테이블 세팅
             showView('tarot-view-game');
             setupCardTable(config);
-        }, 2000);
+        }, 1000);
     }
 
     function setupCardTable(config) {
@@ -376,16 +365,13 @@
         const table = document.getElementById('tarot-card-table');
         table.innerHTML = "";
         
-        // 카드 24장 깔기 (충분한 수량)
-        for(let i=0; i<24; i++) {
+        // [2] 전체 카드 수만큼 생성
+        table.className = `flex-1 overflow-y-auto content-start flex flex-wrap justify-center gap-2 p-2 ${config.style}`;
+        
+        for(let i=1; i<=config.count; i++) {
             const card = document.createElement('div');
-            card.className = `tarot-card-face ${config.color}`; // 덱별 색상
-            card.dataset.idx = i;
-            
-            // 랜덤 회전으로 자연스럽게
-            const rot = Math.random() * 6 - 3; 
-            card.style.transform = `rotate(${rot}deg)`;
-            
+            card.className = 'tarot-card-face'; // 기본 스타일
+            card.dataset.idx = i; // 실제 카드 번호 (1~78)
             card.onclick = () => toggleTarotCard(card, config.key, config.pick);
             table.appendChild(card);
         }
@@ -409,7 +395,8 @@
     
     function updateTarotCount(c, m) { document.getElementById('tarot-selection-count').innerText = `${c} / ${m}`; }
     
-    window.confirmTarotSelection = () => startTarotStage(gameState.stage + 1);
+    // [3] 다음 단계 이동
+    window.confirmTarotSelection = () => processStage(gameState.stage + 1);
 
     async function finishTarot() {
         document.getElementById('loading-img').src = document.getElementById('tarot-mascot').src;
@@ -419,15 +406,20 @@
         const now = new Date();
         const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
         
+        // 선택된 카드 번호 문자열 생성 (예: Waite: [12, 5, 77]...)
+        const sel = gameState.selections;
+        const cardSummary = `Waite:[${sel.waite}], Belline:[${sel.belline}], Lenormand:[${sel.lenormand}]`;
+
+        // [4] 판다 프롬프트 (말투 & 요약 & 실제 선택 반영)
         const prompt = `[현재 날짜: ${today}] 
         역할: 대나무 숲의 현자 '타로 판다'.
         질문: "${gameState.question}"
-        상황: 사용자가 웨이트 4장, 벨린 3장, 레노먼드 3장을 뽑았습니다. (랜덤하게 카드를 뽑았다고 가정하고 해석하세요).
+        사용자가 뽑은 카드 번호: ${cardSummary}. (각 덱의 번호에 해당하는 카드의 의미를 해석하세요).
         
         말투: "~다 판다", "~한다 판다", "대나무 숲의 기운이 느껴진다 판다". 
         
         형식 (Markdown):
-        1. **🎋 선택된 대나무 잎 (카드)**: (랜덤 생성한 카드 목록)
+        1. **🎋 선택된 대나무 잎 (카드)**: (뽑은 카드 이름 나열)
         2. **🐼 판다의 해석**:
            - **현재 (웨이트)**: 
            - **심리 (벨린)**:
@@ -502,7 +494,7 @@
         const field = currentMode === 'tarot' ? 'timestamp' : 'date';
 
         try {
-            const q = query(collection(db, col), orderBy(field, "desc"), limit(20));
+            const q = query(collection(db, col), orderBy(field, "desc"), limit(20)); // 20개 제한
             const snap = await getDocs(q);
             listEl.innerHTML = "";
             if(snap.empty) listEl.innerHTML = "기록이 없습니다.";

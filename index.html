@@ -6,51 +6,162 @@
     <title>HG AI Agents</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- [전역 변수] --- */
         :root {
-            --app-bg-tarot: #e8f5e9; --app-bg-saju: #fffdf5; 
-            --text-panda: #673ab7; --text-cat: #ff5252;
+            --app-bg-tarot: #e8f5e9; 
+            --app-bg-saju: #fffdf5; 
+            --text-panda: #673ab7; 
+            --text-cat: #ff5252;
             --maple-border: #3e2723;
         }
-        body { background-color: #000; margin: 0; overflow: hidden; font-family: 'Do Hyeon', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .hidden { display: none !important; }
-        .app-container { width: 100%; max-width: 600px; height: 100vh; display: flex; flex-direction: column; position: relative; background: #fff; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
 
-        /* 로그인 화면 */
-        #login-screen { position: absolute; inset: 0; z-index: 9999; background: url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1000&auto=format&fit=crop') no-repeat center center; background-size: cover; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #login-screen::before { content: ''; position: absolute; inset: 0; background: rgba(0, 30, 10, 0.4); backdrop-filter: blur(2px); }
-        .maple-title { position: relative; z-index: 10; font-family: 'Black Han Sans', sans-serif; font-size: 3.5rem; color: #fff; text-shadow: 3px 3px 0 #ff6f00, -1px -1px 0 #ff6f00, 1px -1px 0 #ff6f00, -1px 1px 0 #ff6f00, 1px 1px 0 #ff6f00, 5px 5px 10px rgba(0,0,0,0.5); margin-bottom: 20px; transform: rotate(-2deg); animation: float-title 3s ease-in-out infinite; }
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Do Hyeon', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- [앱 컨테이너] --- */
+        .app-container {
+            width: 100%; max-width: 600px; height: 100vh;
+            display: flex; flex-direction: column; position: relative;
+            background: #fff; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        /* --- [0. 로그인 화면 - 메이플스토리 스타일] --- */
+        #login-screen {
+            position: absolute; inset: 0; z-index: 9999;
+            background: url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1000&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        #login-screen::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(0, 30, 10, 0.4);
+            backdrop-filter: blur(2px);
+        }
+
+        .maple-title {
+            position: relative; z-index: 10;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 3.5rem; color: #fff;
+            text-shadow: 3px 3px 0 #ff6f00, -1px -1px 0 #ff6f00, 1px -1px 0 #ff6f00, -1px 1px 0 #ff6f00, 1px 1px 0 #ff6f00, 5px 5px 10px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            transform: rotate(-2deg);
+            animation: float-title 3s ease-in-out infinite;
+        }
         @keyframes float-title { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(-2deg); } }
-        .login-board { position: relative; z-index: 10; width: 85%; max-width: 350px; background: #8d6e63; background-image: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px); border: 6px solid var(--maple-border); border-radius: 15px; padding: 30px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 15px; }
-        .corner-deco { position: absolute; width: 10px; height: 10px; background: #b0bec5; border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
-        .cd-tl { top: 10px; left: 10px; } .cd-tr { top: 10px; right: 10px; } .cd-bl { bottom: 10px; left: 10px; } .cd-br { bottom: 10px; right: 10px; }
-        .maple-input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 2px solid #a1887f; border-radius: 8px; color: #fff; font-size: 1.1rem; text-align: center; outline: none; font-family: 'Do Hyeon', sans-serif; }
-        .maple-input::placeholder { color: #d7ccc8; } .maple-input:focus { border-color: #ffca28; background: rgba(0,0,0,0.5); }
-        .maple-btn { width: 100%; padding: 12px; background: linear-gradient(to bottom, #ffca28, #ff6f00); border: 2px solid #3e2723; border-radius: 8px; font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; color: #3e2723; cursor: pointer; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); box-shadow: 0 4px 0 #3e2723; transition: transform 0.1s; }
+
+        .login-board {
+            position: relative; z-index: 10;
+            width: 85%; max-width: 350px;
+            background: #8d6e63;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px);
+            border: 6px solid var(--maple-border);
+            border-radius: 15px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .corner-deco {
+            position: absolute; width: 10px; height: 10px; background: #b0bec5; border-radius: 50%;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .cd-tl { top: 10px; left: 10px; } .cd-tr { top: 10px; right: 10px; }
+        .cd-bl { bottom: 10px; left: 10px; } .cd-br { bottom: 10px; right: 10px; }
+
+        .maple-input {
+            width: 100%; padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #a1887f;
+            border-radius: 8px;
+            color: #fff; font-size: 1.1rem; text-align: center;
+            outline: none; font-family: 'Do Hyeon', sans-serif;
+        }
+        .maple-input::placeholder { color: #d7ccc8; }
+        .maple-input:focus { border-color: #ffca28; background: rgba(0,0,0,0.5); }
+
+        .maple-btn {
+            width: 100%; padding: 12px;
+            background: linear-gradient(to bottom, #ffca28, #ff6f00);
+            border: 2px solid #3e2723; border-radius: 8px;
+            font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; color: #3e2723;
+            cursor: pointer; text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+            box-shadow: 0 4px 0 #3e2723; transition: transform 0.1s;
+        }
         .maple-btn:active { transform: translateY(4px); box-shadow: none; }
 
-        /* 선택 화면 */
+        /* --- [1. 선택 화면] --- */
         #selection-screen { position: absolute; inset: 0; background: #000; }
-        .split-panel { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; transition: clip-path 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .split-panel {
+            position: absolute; top: 0; bottom: 0; width: 100%; height: 100%;
+            transition: clip-path 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s;
+            cursor: pointer; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        
         .panel-left { background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%); clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); z-index: 10; }
         .panel-right { background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); z-index: 10; }
+
         .panel-left:hover { clip-path: polygon(0 0, 75% 0, 55% 100%, 0 100%); filter: brightness(1.1); z-index: 20; }
         .panel-right:hover { clip-path: polygon(45% 0, 100% 0, 100% 100%, 25% 100%); filter: brightness(1.05); z-index: 20; }
-        .char-img { width: 200px; height: 200px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); animation: float 3s infinite ease-in-out; transition: 0.3s; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .panel-left:hover .char-img { transform: scale(1.1) rotate(-5deg); } .panel-right:hover .char-img { transform: scale(1.1) rotate(5deg); }
-        .title-badge { margin-top: 15px; padding: 8px 20px; border-radius: 12px; font-family: 'Black Han Sans', sans-serif; font-size: 2.5rem; background: rgba(255,255,255,0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .panel-left .title-badge { color: var(--text-panda); border: 3px solid var(--text-panda); } .panel-right .title-badge { color: var(--text-cat); border: 3px solid var(--text-cat); }
 
-        /* 앱 내부 */
-        .theme-tarot .app-container { background: var(--app-bg-tarot); } .theme-saju .app-container { background: var(--app-bg-saju); }
+        .char-img {
+            width: 200px; height: 200px; object-fit: contain;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+            animation: float 3s infinite ease-in-out; transition: 0.3s;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .panel-left:hover .char-img { transform: scale(1.1) rotate(-5deg); }
+        .panel-right:hover .char-img { transform: scale(1.1) rotate(5deg); }
+
+        .title-badge {
+            margin-top: 15px; padding: 8px 20px; border-radius: 12px;
+            font-family: 'Black Han Sans', sans-serif; font-size: 2.5rem;
+            background: rgba(255,255,255,0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .panel-left .title-badge { color: var(--text-panda); border: 3px solid var(--text-panda); }
+        .panel-right .title-badge { color: var(--text-cat); border: 3px solid var(--text-cat); }
+
+        /* --- [2. 앱 내부 스타일] --- */
+        .theme-tarot .app-container { background: var(--app-bg-tarot); }
+        .theme-saju .app-container { background: var(--app-bg-saju); }
+        
         #main-header { padding: 15px; display: flex; justify-content: space-between; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 50; }
-        .action-btn { border-radius: 25px; padding: 12px; border: none; font-size: 1.1rem; font-family: 'Black Han Sans', sans-serif; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s; }
+        
+        .action-btn {
+            border-radius: 25px; padding: 12px; border: none; font-size: 1.1rem;
+            font-family: 'Black Han Sans', sans-serif; cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s;
+        }
         .action-btn:active { transform: translateY(4px); box-shadow: none; }
-        @media (max-width: 768px) { .char-img { width: 140px; height: 140px; } .title-badge { font-size: 1.8rem; } .split-panel:hover { z-index: 10; clip-path: inherit; } .panel-left:hover { clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); } .panel-right:hover { clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); } }
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
+
+        @media (max-width: 768px) {
+            .char-img { width: 140px; height: 140px; }
+            .title-badge { font-size: 1.8rem; }
+            .split-panel:hover { z-index: 10; clip-path: inherit; }
+            .panel-left:hover { clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); }
+            .panel-right:hover { clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); }
+        }
+        
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -68,7 +179,7 @@
             
             <button onclick="attemptLogin()" class="maple-btn">로그인</button>
         </div>
-        <div class="absolute bottom-2 right-2 text-white/40 text-[10px] font-sans font-bold z-20">v1.0.1</div>
+        <div class="absolute bottom-2 right-2 text-white/40 text-[10px] font-sans font-bold z-20">v1.0.2</div>
     </div>
 
     <div id="selection-screen" class="hidden">
@@ -173,7 +284,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // DB Config
     const tarotConfig = { apiKey: "AIzaSyDuQDOi5wxabpqdqu-CJfdR-krk5Q08tBA", projectId: "test-9da10", appId: "1:578765851412:web:5d9d30e09f8427d1a49001" };
@@ -344,10 +455,9 @@
         document.getElementById('loading-text').innerText = "방울을 흔드는 중...";
         document.getElementById('common-view-loading').classList.remove('hidden');
         
-        // [2] 사주 프롬프트 수정 (요약 추가)
         const prompt = `역할: 무속인 고양이. 사주:${sajuState.pillars}. 질문:"${q}".
         형식: 
-        1. **🐱 냥이의 호통**: (질문에 대한 반응, 반말/하대)
+        1. **🐱 냥이의 호통**: (반말/하대)
         2. **📜 운명의 흐름**: (사주 풀이, 반말)
         3. **🧧 도사의 처방**: (조언, 반말)
         4. **📝 인간을 위한 요약**: (위 내용을 인간이 이해하기 쉽게 3줄로 명확하게 요약, 존댓말/친절하게)
@@ -367,6 +477,93 @@
         document.getElementById('common-view-result').classList.remove('hidden');
     }
     window.copyResult = () => navigator.clipboard.writeText(document.getElementById('result-content').innerText).then(()=>alert("복사됨"));
+
+    // --- History (Updated) ---
+    window.openHistory = async () => {
+        // [2] 암호 삭제 및 UI 개선
+        const listEl = document.getElementById('history-list');
+        document.getElementById('common-view-history').classList.remove('hidden');
+        listEl.innerHTML = "로딩 중...";
+        
+        const db = currentMode === 'tarot' ? dbTarot : dbSaju;
+        const col = currentMode === 'tarot' ? 'tarot_readings' : 'saju_history';
+        const field = currentMode === 'tarot' ? 'timestamp' : 'date';
+
+        try {
+            const q = query(collection(db, col), orderBy(field, "desc"), limit(20)); // 20개로 제한
+            const snap = await getDocs(q);
+            listEl.innerHTML = "";
+            if(snap.empty) listEl.innerHTML = "기록이 없습니다.";
+
+            snap.forEach(d => {
+                const data = d.data();
+                const id = d.id;
+                const div = document.createElement('div');
+                div.className = "bg-gray-100 p-3 rounded flex justify-between items-center shadow-sm";
+                div.innerHTML = `
+                    <div class="flex-1 truncate">
+                        <div class="font-bold text-sm text-gray-800">${data.question}</div>
+                        <div class="text-xs text-gray-500 truncate">${(data.response||data.answer).substring(0,30)}...</div>
+                    </div>
+                    <div class="flex gap-2 ml-2">
+                        <button onclick="showDetail('${id}')" class="text-lg hover:scale-110 transition">👁️</button>
+                        <button onclick="deleteHistoryItem('${id}')" class="text-lg hover:scale-110 transition">🗑️</button>
+                    </div>
+                `;
+                // Store full data in memory for fast view (simple hack)
+                div.dataset.fullAnswer = data.response || data.answer;
+                div.dataset.question = data.question;
+                listEl.appendChild(div);
+            });
+        } catch(e) { listEl.innerHTML = "불러오기 실패"; }
+    };
+
+    window.showDetail = (id) => {
+        // Find element by traversing (simpler than re-fetching)
+        const listEl = document.getElementById('history-list');
+        // In a real app we'd map ID to data, here we iterate or just re-fetch if needed.
+        // But for speed, let's just find the div that was clicked.
+        // Actually, cleaner to re-fetch if we didn't store it globally. 
+        // Let's use the DOM data attribute we just set for instant speed.
+        const btns = listEl.querySelectorAll('button');
+        let targetDiv = null;
+        for(let btn of btns) {
+            if(btn.getAttribute('onclick')?.includes(id)) {
+                targetDiv = btn.closest('div').parentElement; // The container div
+                break;
+            }
+        }
+        // Since I can't easily pass 'this' through generated HTML string onclick, let's just re-fetch for simplicity/robustness OR
+        // Better: Make displayResult global and pass string.
+        // Limitation: Passing huge string in onclick is bad.
+        // Solution: Fetch singular doc is fast enough.
+        // But user wanted "faster". 
+        // Let's stick to fetch for reliability but it's Firestore, it's fast.
+        // Wait, I put dataset on the div.
+        // Let's iterate children.
+        const children = document.getElementById('history-list').children;
+        for(let child of children) {
+            if(child.innerHTML.includes(id)) {
+                displayResult(child.dataset.question, child.dataset.fullAnswer);
+                document.getElementById('common-view-history').classList.add('hidden');
+                return;
+            }
+        }
+    };
+
+    window.deleteHistoryItem = async (id) => {
+        if(prompt("삭제 암호(4자리):") !== "1234") return alert("암호 오류");
+        if(!confirm("정말 삭제하시겠습니까?")) return;
+
+        const db = currentMode === 'tarot' ? dbTarot : dbSaju;
+        const col = currentMode === 'tarot' ? 'tarot_readings' : 'saju_history';
+        
+        try {
+            await deleteDoc(doc(db, col, id));
+            alert("삭제되었습니다.");
+            openHistory(); // Refresh list
+        } catch(e) { alert("삭제 실패: " + e.message); }
+    };
 
     // --- Admin ---
     window.checkAdmin = () => { if(currentMode && prompt("암호")==="5690") {
@@ -408,33 +605,6 @@
         }
     }
     
-    // [3] 기록 열람 암호 (1234)
-    window.openHistory = async () => {
-        if(prompt("기록 열람 암호(4자리)를 입력하세요:") !== "1234") return alert("암호가 틀렸습니다.");
-
-        const listEl = document.getElementById('history-list');
-        document.getElementById('common-view-history').classList.remove('hidden');
-        listEl.innerHTML = "로딩 중...";
-        
-        const db = currentMode === 'tarot' ? dbTarot : dbSaju;
-        const col = currentMode === 'tarot' ? 'tarot_readings' : 'saju_history';
-        const field = currentMode === 'tarot' ? 'timestamp' : 'date';
-
-        try {
-            const q = query(collection(db, col), orderBy(field, "desc"), limit(10));
-            const snap = await getDocs(q);
-            listEl.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                const div = document.createElement('div');
-                div.className = "bg-gray-100 p-3 rounded cursor-pointer hover:bg-gray-200";
-                div.innerHTML = `<div class="font-bold text-sm">${data.question}</div><div class="text-xs text-gray-500 truncate">${(data.response||data.answer).substring(0,30)}...</div>`;
-                div.onclick = () => displayResult(data.question, data.response || data.answer);
-                listEl.appendChild(div);
-            });
-        } catch(e) { listEl.innerHTML = "불러오기 실패"; }
-    };
-
     const style = document.createElement('style');
     style.innerHTML = `.wood{background:#2e7d32}.fire{background:#d32f2f}.earth{background:#fbc02d;color:#3e2723}.metal{background:#757575}.water{background:#212121}`;
     document.head.appendChild(style);

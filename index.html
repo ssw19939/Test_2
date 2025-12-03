@@ -15,8 +15,6 @@
             --app-bg-saju: #fffdf5; 
             --text-panda: #673ab7; 
             --text-cat: #ff5252;
-            
-            /* 메이플 스타일 변수 */
             --maple-border: #3e2723;
         }
 
@@ -269,11 +267,11 @@
                     <div class="flex flex-col gap-2">
                         <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-200 p-1 rounded">
                             <input type="radio" name="admin-model-mode" value="fast" class="w-4 h-4 text-blue-600" checked>
-                            <span class="font-bold">⚡ 빠른 옵션 (Gemini 2.5 Flash)</span>
+                            <span class="font-bold">⚡ 빠른 옵션 (gemini-2.5-flash)</span>
                         </label>
                         <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-200 p-1 rounded">
                             <input type="radio" name="admin-model-mode" value="best" class="w-4 h-4 text-blue-600">
-                            <span class="font-bold">🧠 최상 옵션 (Gemini 3 Pro)</span>
+                            <span class="font-bold">🧠 최상 옵션 (gemini-3-pro)</span>
                         </label>
                     </div>
                 </div>
@@ -358,9 +356,9 @@
     async function callGemini(prompt, isJson = false) {
         if (!userApiKey) { alert("인증 필요"); location.reload(); return; }
         
-        // ★ [CORE UPDATE]: 문자열 그대로 사용 (유저 요청)
+        // [수정] 사용자 요청대로 정확한 문자열 사용
         let modelName = 'gemini-2.5-flash'; 
-        if (currentModelMode === 'best') modelName = 'gemini-3-pro';
+        if (currentModelMode === 'best') modelName = 'gemini-3-pro-preview'; // 기존 타로에서 쓰던 명칭 유지
 
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${userApiKey}`;
@@ -370,8 +368,8 @@
             
             if(data.error) {
                 if(data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT') {
-                    // 모델이 없을 경우 에러 메시지 그대로 출력
-                    alert(`API 오류: ${data.error.message}\n(모델명: ${modelName})`);
+                    // 모델이 없거나 권한이 없을 때 메시지 출력
+                    alert(`API 오류: ${data.error.message}\n(요청한 모델: ${modelName})`);
                     return; 
                 }
                 throw new Error(data.error.message);

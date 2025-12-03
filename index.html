@@ -17,8 +17,6 @@
             --text-cat: #ff5252;
             
             /* 메이플 스타일 변수 */
-            --maple-orange: #ff9800;
-            --maple-brown: #5d4037;
             --maple-border: #3e2723;
         }
 
@@ -35,7 +33,7 @@
 
         .hidden { display: none !important; }
 
-        /* --- [앱 컨테이너 (모바일 규격)] --- */
+        /* --- [앱 컨테이너] --- */
         .app-container {
             width: 100%; max-width: 600px; height: 100vh;
             display: flex; flex-direction: column; position: relative;
@@ -45,42 +43,32 @@
         /* --- [0. 로그인 화면 - 메이플스토리 스타일] --- */
         #login-screen {
             position: absolute; inset: 0; z-index: 9999;
-            /* 숲속 배경 */
             background: url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1000&auto=format&fit=crop') no-repeat center center;
             background-size: cover;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         
-        /* 배경 어둡게 처리 */
         #login-screen::before {
             content: ''; position: absolute; inset: 0;
-            background: rgba(0, 30, 10, 0.4); /* 초록빛 틴트 */
+            background: rgba(0, 30, 10, 0.4);
             backdrop-filter: blur(2px);
         }
 
-        /* 메이플 로고 스타일 타이틀 */
         .maple-title {
             position: relative; z-index: 10;
             font-family: 'Black Han Sans', sans-serif;
             font-size: 3.5rem; color: #fff;
-            text-shadow: 
-                3px 3px 0 #ff6f00, 
-                -1px -1px 0 #ff6f00,  
-                1px -1px 0 #ff6f00,
-                -1px 1px 0 #ff6f00,
-                1px 1px 0 #ff6f00,
-                5px 5px 10px rgba(0,0,0,0.5);
+            text-shadow: 3px 3px 0 #ff6f00, -1px -1px 0 #ff6f00, 1px -1px 0 #ff6f00, -1px 1px 0 #ff6f00, 1px 1px 0 #ff6f00, 5px 5px 10px rgba(0,0,0,0.5);
             margin-bottom: 20px;
             transform: rotate(-2deg);
             animation: float-title 3s ease-in-out infinite;
         }
         @keyframes float-title { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(-2deg); } }
 
-        /* 목재 게시판 UI */
         .login-board {
             position: relative; z-index: 10;
             width: 85%; max-width: 350px;
-            background: #8d6e63; /* 기본 나무색 */
+            background: #8d6e63;
             background-image: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px);
             border: 6px solid var(--maple-border);
             border-radius: 15px;
@@ -89,7 +77,6 @@
             display: flex; flex-direction: column; gap: 15px;
         }
 
-        /* 게시판 모서리 장식 */
         .corner-deco {
             position: absolute; width: 10px; height: 10px; background: #b0bec5; border-radius: 50%;
             box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
@@ -97,7 +84,6 @@
         .cd-tl { top: 10px; left: 10px; } .cd-tr { top: 10px; right: 10px; }
         .cd-bl { bottom: 10px; left: 10px; } .cd-br { bottom: 10px; right: 10px; }
 
-        /* 입력창 */
         .maple-input {
             width: 100%; padding: 12px;
             background: rgba(0,0,0,0.3);
@@ -109,7 +95,6 @@
         .maple-input::placeholder { color: #d7ccc8; }
         .maple-input:focus { border-color: #ffca28; background: rgba(0,0,0,0.5); }
 
-        /* 로그인 버튼 */
         .maple-btn {
             width: 100%; padding: 12px;
             background: linear-gradient(to bottom, #ffca28, #ff6f00);
@@ -128,7 +113,6 @@
             cursor: pointer; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         
-        /* 타로(판다): 대나무색 / 사주(고양이): 베이지색 */
         .panel-left { background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%); clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); z-index: 10; }
         .panel-right { background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); z-index: 10; }
 
@@ -370,14 +354,13 @@
 
     window.resetCurrentMode = () => { showView(`${currentMode}-view-start`); };
 
-    // --- API (Model Switcher) ---
+    // --- API (Fixed Model Names) ---
     async function callGemini(prompt, isJson = false) {
         if (!userApiKey) { alert("인증 필요"); location.reload(); return; }
         
-        // [중요] 실제 작동하는 모델명으로 매핑 (사용자 요청: 2.5/3.0 -> 실제: 1.5-flash/1.5-pro)
-        // 만약 실제 2.5/3.0이 출시되면 여기 문자열만 바꾸면 됩니다.
-        let modelName = 'gemini-1.5-flash'; 
-        if (currentModelMode === 'best') modelName = 'gemini-1.5-pro';
+        // ★ [CORE UPDATE]: 문자열 그대로 사용 (유저 요청)
+        let modelName = 'gemini-2.5-flash'; 
+        if (currentModelMode === 'best') modelName = 'gemini-3-pro';
 
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${userApiKey}`;
@@ -387,8 +370,9 @@
             
             if(data.error) {
                 if(data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT') {
-                    alert(`API 키 오류 또는 모델(${modelName}) 권한이 없습니다.\n다시 로그인해주세요.`);
-                    location.reload(); return;
+                    // 모델이 없을 경우 에러 메시지 그대로 출력
+                    alert(`API 오류: ${data.error.message}\n(모델명: ${modelName})`);
+                    return; 
                 }
                 throw new Error(data.error.message);
             }

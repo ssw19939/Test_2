@@ -6,7 +6,7 @@
     <title>HG AI Agents</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         /* --- [전역 변수] --- */
@@ -171,8 +171,7 @@
     <div id="login-screen">
         <h1 class="maple-title">HG AI Agents</h1>
         <div class="login-board">
-            <div class="corner-deco cd-tl"></div><div class="corner-deco cd-tr"></div>
-            <div class="corner-deco cd-bl"></div><div class="corner-deco cd-br"></div>
+            <div class="corner-deco cd-tl"></div><div class="corner-deco cd-tr"></div><div class="corner-deco cd-bl"></div><div class="corner-deco cd-br"></div>
             
             <div class="text-center text-white/80 text-sm mb-2 font-bold">System Access</div>
             
@@ -180,6 +179,7 @@
             
             <button onclick="attemptLogin()" class="maple-btn">로그인</button>
         </div>
+        <div class="absolute bottom-2 right-2 text-white/40 text-[10px] font-sans font-bold z-20">v1.0.0</div>
     </div>
 
     <div id="selection-screen" class="hidden">
@@ -187,7 +187,6 @@
             <img id="intro-panda-img" src="./panda.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3069/3069172.png'" class="char-img">
             <div class="title-badge">타로 판다</div>
         </div>
-
         <div class="split-panel panel-right" onclick="selectMode('saju')">
             <img id="intro-cat-img" src="./cat.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616430.png'" class="char-img">
             <div class="title-badge">무속 냥이</div>
@@ -358,7 +357,7 @@
         
         // [수정] 사용자 요청대로 정확한 문자열 사용
         let modelName = 'gemini-2.5-flash'; 
-        if (currentModelMode === 'best') modelName = 'gemini-3-pro-preview'; // 기존 타로에서 쓰던 명칭 유지
+        if (currentModelMode === 'best') modelName = 'gemini-3-pro-preview';
 
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${userApiKey}`;
@@ -435,6 +434,7 @@
     }
 
     // --- Saju ---
+    // [2] 사주 프롬프트 수정
     window.processSajuManse = async () => {
         sajuState.info = { date: document.getElementById('saju-date').value, time: document.getElementById('saju-time').value, gender: document.getElementById('saju-gender').value };
         document.getElementById('loading-img').src = document.getElementById('saju-mascot').src;
@@ -457,8 +457,18 @@
         if(!q) return alert("질문 입력!");
         document.getElementById('loading-text').innerText = "방울을 흔드는 중...";
         document.getElementById('common-view-loading').classList.remove('hidden');
+        
+        // [2] 사주 프롬프트 수정 (요약 추가)
+        const prompt = `역할: 무속인 고양이. 사주:${sajuState.pillars}. 질문:"${q}".
+        형식: 
+        1. **🐱 냥이의 호통**: (질문에 대한 반응, 반말/하대)
+        2. **📜 운명의 흐름**: (사주 풀이, 반말)
+        3. **🧧 도사의 처방**: (조언, 반말)
+        4. **📝 인간을 위한 요약**: (위 내용을 인간이 이해하기 쉽게 3줄로 명확하게 요약, 존댓말/친절하게)
+        마크다운 형식.`;
+
         try {
-            const text = await callGemini(`역할:무속인고양이. 사주:${sajuState.pillars}. 질문:${q}. 마크다운해석.`);
+            const text = await callGemini(prompt);
             displayResult(q, text);
             await addDoc(collection(dbSaju, "saju_history"), { question: q, answer: text, date: new Date().toISOString() });
         } catch(e) {}

@@ -11,15 +11,19 @@
     <style>
         /* --- [전역 변수] --- */
         :root {
-            --wood-dark: #5d4037;
-            --wood-light: #8d6e63;
-            --wood-border: #3e2723;
-            --gold-btn: #ffca28;
-            --gold-shadow: #ff6f00;
+            --app-bg-tarot: #e8f5e9; 
+            --app-bg-saju: #fffdf5; 
+            --text-panda: #673ab7; 
+            --text-cat: #ff5252;
+            
+            /* 메이플 스타일 변수 */
+            --maple-orange: #ff9800;
+            --maple-brown: #5d4037;
+            --maple-border: #3e2723;
         }
 
         body {
-            background-color: #111;
+            background-color: #000;
             margin: 0;
             overflow: hidden;
             font-family: 'Do Hyeon', sans-serif;
@@ -29,64 +33,92 @@
             height: 100vh;
         }
 
-        /* --- [앱 컨테이너] --- */
+        .hidden { display: none !important; }
+
+        /* --- [앱 컨테이너 (모바일 규격)] --- */
         .app-container {
             width: 100%; max-width: 600px; height: 100vh;
             display: flex; flex-direction: column; position: relative;
             background: #fff; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
 
-        .hidden { display: none !important; }
-
-        /* --- [0. 로그인 화면 (목재 UI)] --- */
+        /* --- [0. 로그인 화면 - 메이플스토리 스타일] --- */
         #login-screen {
             position: absolute; inset: 0; z-index: 9999;
-            background: linear-gradient(to bottom, #2c3e50, #4ca1af); 
+            /* 숲속 배경 */
+            background: url('https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1000&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
-        /* 파티클 효과 */
-        .firefly {
-            position: absolute; width: 4px; height: 4px; background: #fff; border-radius: 50%;
-            opacity: 0; animation: firefly-move 5s infinite; box-shadow: 0 0 10px #fff;
-        }
-        @keyframes firefly-move {
-            0% { transform: translate(0, 0); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)); opacity: 0; }
+        
+        /* 배경 어둡게 처리 */
+        #login-screen::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(0, 30, 10, 0.4); /* 초록빛 틴트 */
+            backdrop-filter: blur(2px);
         }
 
-        /* 목재 게시판 */
-        .wooden-board {
-            position: relative; width: 85%; padding: 40px 20px;
-            background: repeating-linear-gradient(90deg, #8d6e63 0, #8d6e63 10px, #795548 10px, #795548 20px);
-            border: 8px solid var(--wood-border); border-radius: 15px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.5), 0 0 0 4px #5d4037;
-            text-align: center; display: flex; flex-direction: column; gap: 20px; z-index: 10;
+        /* 메이플 로고 스타일 타이틀 */
+        .maple-title {
+            position: relative; z-index: 10;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 3.5rem; color: #fff;
+            text-shadow: 
+                3px 3px 0 #ff6f00, 
+                -1px -1px 0 #ff6f00,  
+                1px -1px 0 #ff6f00,
+                -1px 1px 0 #ff6f00,
+                1px 1px 0 #ff6f00,
+                5px 5px 10px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            transform: rotate(-2deg);
+            animation: float-title 3s ease-in-out infinite;
+        }
+        @keyframes float-title { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(-2deg); } }
+
+        /* 목재 게시판 UI */
+        .login-board {
+            position: relative; z-index: 10;
+            width: 85%; max-width: 350px;
+            background: #8d6e63; /* 기본 나무색 */
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px);
+            border: 6px solid var(--maple-border);
+            border-radius: 15px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column; gap: 15px;
         }
 
-        .nail {
-            position: absolute; width: 12px; height: 12px;
-            background: radial-gradient(circle, #b0bec5 30%, #546e7a 100%);
-            border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        /* 게시판 모서리 장식 */
+        .corner-deco {
+            position: absolute; width: 10px; height: 10px; background: #b0bec5; border-radius: 50%;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
-        .n-tl { top: 10px; left: 10px; } .n-tr { top: 10px; right: 10px; }
-        .n-bl { bottom: 10px; left: 10px; } .n-br { bottom: 10px; right: 10px; }
+        .cd-tl { top: 10px; left: 10px; } .cd-tr { top: 10px; right: 10px; }
+        .cd-bl { bottom: 10px; left: 10px; } .cd-br { bottom: 10px; right: 10px; }
 
-        .retro-input {
-            width: 100%; padding: 15px; background: #fff8e1; border: 3px solid #5d4037; border-radius: 8px;
-            font-family: 'Black Han Sans', sans-serif; font-size: 1.2rem; text-align: center; color: #3e2723;
-            outline: none; transition: 0.2s; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+        /* 입력창 */
+        .maple-input {
+            width: 100%; padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #a1887f;
+            border-radius: 8px;
+            color: #fff; font-size: 1.1rem; text-align: center;
+            outline: none; font-family: 'Do Hyeon', sans-serif;
         }
-        .retro-input:focus { background: #fff; border-color: var(--gold-shadow); }
+        .maple-input::placeholder { color: #d7ccc8; }
+        .maple-input:focus { border-color: #ffca28; background: rgba(0,0,0,0.5); }
 
-        .retro-btn {
-            width: 100%; padding: 15px; background: linear-gradient(to bottom, #ffeb3b, #fbc02d);
-            border: 2px solid #f57f17; border-bottom-width: 5px; border-radius: 10px;
+        /* 로그인 버튼 */
+        .maple-btn {
+            width: 100%; padding: 12px;
+            background: linear-gradient(to bottom, #ffca28, #ff6f00);
+            border: 2px solid #3e2723; border-radius: 8px;
             font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; color: #3e2723;
-            cursor: pointer; transition: 0.1s; text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+            cursor: pointer; text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+            box-shadow: 0 4px 0 #3e2723; transition: transform 0.1s;
         }
-        .retro-btn:active { transform: translateY(3px); border-bottom-width: 2px; }
+        .maple-btn:active { transform: translateY(4px); box-shadow: none; }
 
         /* --- [1. 선택 화면] --- */
         #selection-screen { position: absolute; inset: 0; background: #000; }
@@ -96,8 +128,9 @@
             cursor: pointer; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         
+        /* 타로(판다): 대나무색 / 사주(고양이): 베이지색 */
         .panel-left { background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%); clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); z-index: 10; }
-        .panel-right { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); z-index: 10; }
+        .panel-right { background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); z-index: 10; }
 
         .panel-left:hover { clip-path: polygon(0 0, 75% 0, 55% 100%, 0 100%); filter: brightness(1.1); z-index: 20; }
         .panel-right:hover { clip-path: polygon(45% 0, 100% 0, 100% 100%, 25% 100%); filter: brightness(1.05); z-index: 20; }
@@ -115,14 +148,14 @@
         .title-badge {
             margin-top: 15px; padding: 8px 20px; border-radius: 12px;
             font-family: 'Black Han Sans', sans-serif; font-size: 2.5rem;
-            background: rgba(255,255,255,0.9); box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .panel-left .title-badge { color: #673ab7; border: 3px solid #673ab7; }
-        .panel-right .title-badge { color: #ef5350; border: 3px solid #ef5350; }
+        .panel-left .title-badge { color: var(--text-panda); border: 3px solid var(--text-panda); }
+        .panel-right .title-badge { color: var(--text-cat); border: 3px solid var(--text-cat); }
 
         /* --- [2. 앱 내부 스타일] --- */
-        .theme-tarot .app-container { background: #e8f5e9; }
-        .theme-saju .app-container { background: #fffdf5; }
+        .theme-tarot .app-container { background: var(--app-bg-tarot); }
+        .theme-saju .app-container { background: var(--app-bg-saju); }
         
         #main-header { padding: 15px; display: flex; justify-content: space-between; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 50; }
         
@@ -140,6 +173,13 @@
             .panel-left:hover { clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%); }
             .panel-right:hover { clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%); }
         }
+        
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -147,14 +187,16 @@
 <div class="app-container">
 
     <div id="login-screen">
-        <div class="firefly" style="--x: 50px; --y: -50px; top: 20%; left: 20%; animation-delay: 0s;"></div>
-        <div class="firefly" style="--x: -30px; --y: 40px; top: 70%; left: 80%; animation-delay: 1s;"></div>
-        <div class="wooden-board">
-            <div class="nail n-tl"></div><div class="nail n-tr"></div>
-            <div class="nail n-bl"></div><div class="nail n-br"></div>
-            <div style="height: 20px;"></div>
-            <input type="password" id="login-api-key" class="retro-input" placeholder="암호를 입력하세요">
-            <button onclick="attemptLogin()" class="retro-btn">로그인</button>
+        <h1 class="maple-title">HG AI Agents</h1>
+        <div class="login-board">
+            <div class="corner-deco cd-tl"></div><div class="corner-deco cd-tr"></div>
+            <div class="corner-deco cd-bl"></div><div class="corner-deco cd-br"></div>
+            
+            <div class="text-center text-white/80 text-sm mb-2 font-bold">System Access</div>
+            
+            <input type="password" id="login-api-key" class="maple-input" placeholder="암호 입력">
+            
+            <button onclick="attemptLogin()" class="maple-btn">로그인</button>
         </div>
     </div>
 
@@ -163,6 +205,7 @@
             <img id="intro-panda-img" src="./panda.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3069/3069172.png'" class="char-img">
             <div class="title-badge">타로 판다</div>
         </div>
+
         <div class="split-panel panel-right" onclick="selectMode('saju')">
             <img id="intro-cat-img" src="./cat.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616430.png'" class="char-img">
             <div class="title-badge">무속 냥이</div>
@@ -185,12 +228,12 @@
                 <h2 id="tarot-title" class="text-2xl font-bold text-green-900 mb-2 font-[Black Han Sans]">무엇이 궁금한가?</h2>
                 <p id="tarot-subtitle" class="text-green-700 mb-6 text-sm">대나무 숲의 판다가 카드를 펼칩니다.</p>
                 <input type="text" id="tarot-input" placeholder="예: 연애운이 궁금해!" class="w-full p-4 border-2 border-green-400 rounded-xl text-center mb-4 text-lg font-bold bg-white" onkeypress="if(event.key==='Enter') startTarotGame()">
-                <button class="action-btn bg-green-600 text-white w-full" onclick="startTarotGame()">상담 시작</button>
+                <button class="action-btn bg-green-600 text-white w-full shadow-lg" onclick="startTarotGame()">상담 시작</button>
             </div>
             <div id="tarot-view-game" class="hidden h-full flex flex-col">
                 <div class="bg-green-100 p-3 text-center rounded-lg mb-4"><h3 id="tarot-stage-title" class="font-bold text-green-800">카드 선택</h3><p id="tarot-stage-desc" class="text-xs text-green-600">직관적으로 카드를 고르세요.</p></div>
                 <div id="tarot-card-table" class="flex-1 flex flex-wrap justify-center gap-2 content-start overflow-y-auto p-2"></div>
-                <div class="mt-4 text-center"><div id="tarot-selection-count" class="font-bold text-green-800 mb-2">0 / 0</div><button id="tarot-next-btn" class="action-btn bg-green-600 text-white w-full hidden" onclick="confirmTarotSelection()">다음 단계</button></div>
+                <div class="mt-4 text-center"><div id="tarot-selection-count" class="font-bold text-green-800 mb-2">0 / 0</div><button id="tarot-next-btn" class="action-btn bg-green-600 text-white w-full hidden shadow-lg" onclick="confirmTarotSelection()">다음 단계</button></div>
             </div>
         </div>
 
@@ -205,7 +248,7 @@
                         <div class="flex-1"><label class="block text-xs font-bold text-left ml-1 mb-1 text-red-800">⏰ 시간</label><input type="time" id="saju-time" class="w-full p-3 border border-red-200 rounded-lg text-center font-bold text-gray-700 bg-red-50" value="12:00"></div>
                         <div class="flex-1"><label class="block text-xs font-bold text-left ml-1 mb-1 text-red-800">⚧ 성별</label><select id="saju-gender" class="w-full p-3 border border-red-200 rounded-lg text-center font-bold text-gray-700 bg-red-50"><option value="male">남자</option><option value="female">여자</option></select></div>
                     </div>
-                    <button class="action-btn bg-red-500 text-white w-full mt-2" onclick="processSajuManse()">만세력 보기</button>
+                    <button class="action-btn bg-red-500 text-white w-full mt-2 shadow-lg" onclick="processSajuManse()">만세력 보기</button>
                 </div>
             </div>
             <div id="saju-view-icebreak" class="hidden h-full flex flex-col">
@@ -214,7 +257,7 @@
                     <div id="saju-pillars" class="flex justify-center gap-3 mb-2"></div>
                 </div>
                 <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 mb-6 relative"><div class="absolute -top-3 -left-1 text-2xl">🐱</div><p id="saju-persona-msg" class="text-sm pl-4 text-gray-800 font-medium leading-relaxed">분석 중...</p></div>
-                <div class="mt-auto"><label class="block text-center font-bold mb-2 text-red-900">무엇이 궁금하느냐냥?</label><input type="text" id="saju-input" placeholder="예: 올해 재물운이 어때?" class="w-full p-4 border-2 border-red-800 rounded-xl text-center mb-3 font-bold bg-white" onkeypress="if(event.key==='Enter') startSajuConsult()"><button class="action-btn bg-red-500 text-white w-full" onclick="startSajuConsult()">점괘 뽑기</button></div>
+                <div class="mt-auto"><label class="block text-center font-bold mb-2 text-red-900">무엇이 궁금하느냐냥?</label><input type="text" id="saju-input" placeholder="예: 올해 재물운이 어때?" class="w-full p-4 border-2 border-red-800 rounded-xl text-center mb-3 font-bold bg-white" onkeypress="if(event.key==='Enter') startSajuConsult()"><button class="action-btn bg-red-500 text-white w-full shadow-lg" onclick="startSajuConsult()">점괘 뽑기</button></div>
             </div>
         </div>
 
@@ -240,13 +283,13 @@
                 <div class="p-3 bg-gray-100 rounded-lg border border-gray-200">
                     <label class="block text-xs font-bold text-gray-600 mb-2">AI 모델 모드 (공유 설정)</label>
                     <div class="flex flex-col gap-2">
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-200 p-1 rounded">
                             <input type="radio" name="admin-model-mode" value="fast" class="w-4 h-4 text-blue-600" checked>
-                            <span>⚡ 빠른 옵션 (Gemini 2.5 Flash)</span>
+                            <span class="font-bold">⚡ 빠른 옵션 (Gemini 2.5 Flash)</span>
                         </label>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-200 p-1 rounded">
                             <input type="radio" name="admin-model-mode" value="best" class="w-4 h-4 text-blue-600">
-                            <span>🧠 최상 옵션 (Gemini 3 Pro)</span>
+                            <span class="font-bold">🧠 최상 옵션 (Gemini 3 Pro)</span>
                         </label>
                     </div>
                 </div>
@@ -276,7 +319,7 @@
     let sajuState = { pillars: [], colors: [], info: {} };
     let uploadedImageBase64 = null; 
     let userApiKey = null; 
-    let currentModelMode = 'fast'; // Default
+    let currentModelMode = 'fast'; 
 
     // --- Login ---
     window.attemptLogin = () => {
@@ -327,23 +370,31 @@
 
     window.resetCurrentMode = () => { showView(`${currentMode}-view-start`); };
 
-    // --- API ---
+    // --- API (Model Switcher) ---
     async function callGemini(prompt, isJson = false) {
         if (!userApiKey) { alert("인증 필요"); location.reload(); return; }
         
-        // 모델 선택 로직 (admin에서 설정한 값)
-        let modelName = 'gemini-1.5-flash'; // Default (Fast/2.5 Flash Proxy)
-        if (currentModelMode === 'best') modelName = 'gemini-3-pro-preview'; // Best
+        // [중요] 실제 작동하는 모델명으로 매핑 (사용자 요청: 2.5/3.0 -> 실제: 1.5-flash/1.5-pro)
+        // 만약 실제 2.5/3.0이 출시되면 여기 문자열만 바꾸면 됩니다.
+        let modelName = 'gemini-1.5-flash'; 
+        if (currentModelMode === 'best') modelName = 'gemini-1.5-pro';
 
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${userApiKey}`;
             const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: isJson ? { responseMimeType: "application/json" } : {} };
             const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
             const data = await res.json();
-            if(data.error) throw new Error(data.error.message);
+            
+            if(data.error) {
+                if(data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT') {
+                    alert(`API 키 오류 또는 모델(${modelName}) 권한이 없습니다.\n다시 로그인해주세요.`);
+                    location.reload(); return;
+                }
+                throw new Error(data.error.message);
+            }
             return data.candidates[0].content.parts[0].text;
         } catch (e) { 
-            alert("오류: " + e.message + "\n로그인 화면으로 이동"); location.reload(); throw e;
+            alert("오류: " + e.message); throw e;
         }
     }
 
@@ -444,7 +495,6 @@
         document.getElementById('admin-modal').classList.remove('hidden');
         document.getElementById('admin-mode-label').innerText = currentMode;
         document.getElementById('admin-img-preview').src = document.getElementById(`${currentMode}-mascot`).src;
-        // 모델 라디오 버튼 상태 반영
         const radios = document.getElementsByName('admin-model-mode');
         for(let r of radios) { r.checked = (r.value === currentModelMode); }
         uploadedImageBase64 = null;
@@ -454,15 +504,13 @@
     }};
     window.saveAdmin = async () => {
         const t=document.getElementById('admin-title').value, s=document.getElementById('admin-subtitle').value;
-        // 모델 설정 읽기
         let selectedModel = 'fast';
         const radios = document.getElementsByName('admin-model-mode');
         for(let r of radios) { if(r.checked) selectedModel = r.value; }
 
-        const data={ modelMode: selectedModel }; // 모델 설정은 무조건 저장
+        const data={ modelMode: selectedModel }; 
         if(t)data.title=t; if(s)data.subtitle=s; if(uploadedImageBase64)data.imgUrl=uploadedImageBase64;
 
-        // 양쪽 DB 모두에 저장 (Sync)
         await setDoc(doc(dbTarot, "settings", "config"), data, {merge:true});
         await setDoc(doc(dbSaju, "settings", "config"), data, {merge:true});
         
@@ -472,9 +520,7 @@
         const snap = await getDoc(doc(m==='tarot'?dbTarot:dbSaju, "settings", "config"));
         if(snap.exists()) {
             const d = snap.data();
-            // 전역 모델 설정 로드
             if(d.modelMode) currentModelMode = d.modelMode;
-
             if(!h) {
                 if(d.title) document.getElementById(`${m}-title`).innerText = d.title;
                 if(d.subtitle) document.getElementById(`${m}-subtitle`).innerText = d.subtitle;

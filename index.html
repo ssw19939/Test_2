@@ -10,33 +10,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --app-bg-tarot: #e8f5e9; --app-bg-saju: #fffdf5; }
+        /* 폰트 구분 */
+        .font-corp { font-family: 'Noto Sans KR', sans-serif; }
+        .font-fun { font-family: 'Do Hyeon', sans-serif; }
+        .font-impact { font-family: 'Black Han Sans', sans-serif; }
+
         body { background-color: #f3f4f6; margin: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100dvh; }
         .hidden { display: none !important; }
         
         .app-container { width: 100%; max-width: 1024px; height: 100dvh; display: flex; flex-direction: column; position: relative; background: #fff; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
 
-        /* --- 1. 로그인 화면 (완벽한 업무용 위장) --- */
+        /* --- 1. 로그인 화면 (완벽한 위장 - 업무용) --- */
         #login-screen { position: absolute; inset: 0; z-index: 9999; background: #fff; display: flex; flex-direction: row; font-family: 'Noto Sans KR', sans-serif; }
         
         /* 사이드바 */
         .sidebar { width: 60px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; background: #fff; }
-        .sidebar-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #4b5563; }
+        .sidebar-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #4b5563; transition: 0.2s; }
+        .sidebar-icon:hover { background-color: #f3f4f6; }
         .sidebar-icon.active { background: #eff6ff; color: #2563eb; }
         .sidebar-bottom { margin-top: auto; padding-bottom: 20px; }
 
-        /* 메인 영역 */
+        /* 메인 대시보드 영역 */
         .login-main { flex: 1; display: flex; flex-direction: column; position: relative; }
-        .top-nav { height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 20px; }
+        .top-nav { height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
         
         .dashboard-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 100px; overflow-y: auto; }
         
         .logo-area { text-align: center; margin-bottom: 40px; }
         .logo-img { width: 64px; height: 64px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .main-title { font-size: 1.8rem; font-weight: 700; color: #111827; margin-bottom: 5px; }
+        .main-title { font-size: 1.8rem; font-weight: 700; color: #111827; margin-bottom: 5px; letter-spacing: -0.5px; }
         .sub-desc { color: #6b7280; font-size: 0.95rem; }
 
-        /* 아이콘 그리드 */
+        /* 아이콘 메뉴 (위장) */
         .icon-grid { display: flex; gap: 20px; margin-bottom: 40px; }
         .icon-box { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; opacity: 0.8; transition: 0.2s; }
         .icon-box:hover { opacity: 1; transform: translateY(-2px); }
@@ -45,7 +50,7 @@
         .icon-text { font-size: 0.8rem; font-weight: 600; color: #4b5563; }
         .icon-box.active .icon-text { color: #2563eb; }
 
-        /* 카드 그리드 */
+        /* 카드 (위장) */
         .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 800px; padding: 0 20px; }
         .feature-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; cursor: pointer; transition: 0.2s; background: #fff; }
         .feature-card:hover { border-color: #9ca3af; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -54,77 +59,80 @@
         .card-desc { font-size: 0.85rem; color: #6b7280; line-height: 1.5; word-break: keep-all; }
         .feature-card.full-width { grid-column: span 2; flex-direction: row; text-align: left; align-items: center; gap: 20px; }
 
-        /* 하단 입력창 (API 키 입력) */
+        /* 하단 입력창 (실제 로그인) */
         .bottom-input-area { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: #fff; border-top: 1px solid #e5e7eb; display: flex; justify-content: center; }
-        .input-wrapper { width: 100%; max-width: 800px; border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .input-wrapper { width: 100%; max-width: 800px; border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: border-color 0.2s; }
+        .input-wrapper:focus-within { border-color: #2563eb; ring: 2px solid #bfdbfe; }
         .chat-input { border: none; outline: none; width: 100%; font-size: 0.95rem; color: #374151; resize: none; background: transparent; }
         .input-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
-        .badge { background: #f3f4f6; padding: 2px 8px; rounded: 4px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+        .badge { background: #f3f4f6; padding: 2px 8px; rounded: 4px; font-weight: 500; display: flex; align-items: center; gap: 4px; cursor: pointer; }
 
-        /* --- 2. 선택 화면 (게임 스타일 애니메이션) --- */
+        /* --- 2. 선택 화면 (재미있는 애니메이션 복구) --- */
         #selection-screen { position: absolute; inset: 0; background: #1a1a1a; overflow: hidden; }
         
         .split-panel { 
             position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            transition: clip-path 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), z-index 0s 0.1s; 
             cursor: pointer; overflow: hidden;
         }
 
         /* 왼쪽 (타로) */
         .panel-left { 
-            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%); 
+            background: linear-gradient(135deg, #43a047 0%, #1b5e20 100%); 
             clip-path: polygon(0 0, 55% 0, 45% 100%, 0 100%); 
             z-index: 10; 
         }
         
         /* 오른쪽 (사주) */
         .panel-right { 
-            background: linear-gradient(135deg, #fff8e1 0%, #ffcc80 100%); 
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); 
             clip-path: polygon(55% 0, 100% 0, 100% 100%, 45% 100%); 
             z-index: 10; 
         }
 
-        /* ★ 핵심 애니메이션: 마우스 오버 시 영역 확장 ★ */
+        /* ★ Hover Animation Logic ★ */
         .panel-left:hover { clip-path: polygon(0 0, 85% 0, 65% 100%, 0 100%); z-index: 20; filter: brightness(1.1); }
         .panel-right:hover { clip-path: polygon(35% 0, 100% 0, 100% 100%, 15% 100%); z-index: 20; filter: brightness(1.05); }
 
         .char-img { 
-            width: 260px; height: 260px; object-fit: contain; 
+            width: 280px; height: 280px; object-fit: contain; 
             filter: drop-shadow(0 15px 30px rgba(0,0,0,0.5)); 
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 텐션감 있는 줌 */
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        /* 마우스 오버 시 캐릭터 튀어나옴 */
         .panel-left:hover .char-img { transform: scale(1.3) rotate(-5deg); }
         .panel-right:hover .char-img { transform: scale(1.3) rotate(5deg); }
 
+        /* 타이틀 배지 (재미있는 폰트) */
         .title-badge { 
-            margin-top: 20px; padding: 10px 25px; border-radius: 50px; 
-            font-family: 'Black Han Sans', sans-serif; font-size: 2.5rem; 
-            background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-            transition: 0.3s; color: #333; z-index: 30;
+            margin-top: 20px; padding: 10px 30px; border-radius: 50px; 
+            font-family: 'Black Han Sans', sans-serif; font-size: 3.5rem; /* 폰트 큼직하게 */
+            background: #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
+            transition: transform 0.3s; z-index: 30; letter-spacing: 2px;
         }
-        .panel-left .title-badge { color: #1b5e20; border: 4px solid #1b5e20; }
-        .panel-right .title-badge { color: #e65100; border: 4px solid #e65100; }
+        .panel-left .title-badge { color: #1b5e20; border: 5px solid #1b5e20; }
+        .panel-right .title-badge { color: #e65100; border: 5px solid #e65100; }
+        
+        .panel-left:hover .title-badge { transform: scale(1.1); }
+        .panel-right:hover .title-badge { transform: scale(1.1); }
 
-        /* --- 3. 메인 앱 공통 (재미 모드) --- */
-        .theme-tarot .app-container { background: var(--app-bg-tarot); } .theme-saju .app-container { background: var(--app-bg-saju); }
-        #main-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.1); backdrop-filter: blur(5px); z-index: 50; flex-shrink: 0; }
-        .header-title { font-family: 'Black Han Sans', sans-serif; font-size: 1.4rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        /* --- 3. 메인 앱 (재미 모드) --- */
+        .theme-tarot .app-container { background: #e8f5e9; } .theme-saju .app-container { background: #fffdf5; }
+        #main-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.05); z-index: 50; flex-shrink: 0; }
+        .header-title { font-family: 'Black Han Sans', sans-serif; font-size: 1.5rem; color: #333; }
 
-        /* 버튼 스타일 */
-        .action-btn { width: 100%; padding: 16px; border-radius: 16px; font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; border: none; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s; margin-top: 10px; }
+        /* 버튼 & 카드 스타일 */
+        .action-btn { width: 100%; padding: 15px; border-radius: 12px; font-family: 'Black Han Sans', sans-serif; font-size: 1.2rem; border: none; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s; margin-top: 10px; }
         .action-btn:active { transform: translateY(4px); box-shadow: none; }
         .btn-green { background: #2e7d32; color: white; }
         .btn-red { background: #d32f2f; color: white; }
 
-        /* 타로 카드 스타일 */
-        #tarot-card-table { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 8px; padding: 20px; overflow-y: auto; flex: 1; }
-        .tarot-card-face { width: 55px; height: 90px; background: radial-gradient(circle, #4a148c 0%, #311b92 100%); border: 2px solid #b39ddb; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        #tarot-card-table { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; padding: 15px; overflow-y: auto; flex: 1; }
+        .tarot-card-face { width: 50px; height: 85px; background: radial-gradient(circle, #4a148c 0%, #311b92 100%); border: 1px solid #fff; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .tarot-card-face:hover { transform: translateY(-10px) scale(1.1); z-index: 10; }
-        .card-selected { border: 3px solid #ffd700 !important; background: #ff6f00 !important; transform: translateY(-15px) scale(1.2) !important; box-shadow: 0 0 20px #ffd700 !important; z-index: 20; }
-        .card-selected::after { content: '✨'; font-size: 1.5rem; }
+        .card-selected { border: 2px solid #ffd700 !important; background: #ff6f00 !important; transform: translateY(-15px) scale(1.2) !important; box-shadow: 0 0 15px #ffd700 !important; z-index: 20; }
+        .card-selected::after { content: '✨'; }
 
         /* Markdown */
         .markdown-body h1 { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-size: 1.4rem; font-weight: bold; }
@@ -147,7 +155,11 @@
         
         <div class="login-main">
             <div class="top-nav">
-                <i class="fas fa-bars text-gray-500 text-lg"></i>
+                <i class="fas fa-bars text-gray-500 text-lg cursor-pointer"></i>
+                <div class="flex gap-3">
+                    <i class="far fa-bell text-gray-500 cursor-pointer"></i>
+                    <i class="far fa-user-circle text-gray-500 cursor-pointer"></i>
+                </div>
             </div>
             
             <div class="dashboard-content">
@@ -168,7 +180,7 @@
                     </div>
                     <div class="icon-box">
                         <div class="icon-circle"><i class="fas fa-rocket"></i></div>
-                        <span class="icon-text">AI 업무지원</span>
+                        <span class="icon-text">AI 업무</span>
                     </div>
                     <div class="icon-box">
                         <div class="icon-circle"><i class="fas fa-globe"></i></div>
@@ -184,18 +196,18 @@
                     <div class="feature-card">
                         <div class="card-icon">📚</div>
                         <div class="card-title">KM Search</div>
-                        <div class="card-desc">한미글로벌 KM 자료를 심층 검색하여 깊이 있는 답변을 제공합니다.</div>
+                        <div class="card-desc">사내 KM 자료를 심층 검색하여 답변합니다.</div>
                     </div>
                     <div class="feature-card">
                         <div class="card-icon">🔍</div>
                         <div class="card-title">Deep Research</div>
-                        <div class="card-desc">웹문서를 심층 검색하여 깊이 있는 답변을 제공합니다.</div>
+                        <div class="card-desc">웹문서를 심층 검색하여 답변을 제공합니다.</div>
                     </div>
                     <div class="feature-card full-width">
                         <div class="card-icon">💬</div>
                         <div>
                             <div class="card-title">AI 일반 챗봇</div>
-                            <div class="card-desc">이전 버전 HG AI 챗봇입니다.</div>
+                            <div class="card-desc">이전 버전의 AI 챗봇 서비스를 이용할 수 있습니다.</div>
                         </div>
                     </div>
                 </div>
@@ -206,11 +218,11 @@
                     <input type="password" id="login-api-key" class="chat-input" placeholder="질문을 입력하세요... (AI와 대화하려면 Enter)" onkeypress="if(event.key==='Enter') attemptLogin()">
                     <div class="input-footer">
                         <div class="flex gap-2">
-                            <span class="badge"><i class="fas fa-paperclip"></i> AI 모델</span>
+                            <span class="badge"><i class="fas fa-paperclip"></i> 파일 첨부</span>
                             <span class="badge">Gemini 3 Pro (Preview) ▼</span>
                             <span class="badge">Thinking 레벨 높음 ▼</span>
                         </div>
-                        <i class="fas fa-microphone text-lg cursor-pointer hover:text-blue-500" onclick="attemptLogin()"></i>
+                        <i class="fas fa-arrow-up text-white bg-blue-600 rounded-full p-2 w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-blue-700" onclick="attemptLogin()"></i>
                     </div>
                 </div>
             </div>
@@ -230,28 +242,30 @@
 
     <div id="main-app-ui" class="hidden h-full flex flex-col relative font-fun">
         <header id="main-header">
-            <button onclick="goHome()" class="text-white text-lg"><i class="fas fa-chevron-left"></i> 처음으로</button>
+            <button onclick="goHome()" class="text-gray-600 font-bold"><i class="fas fa-arrow-left"></i> 처음으로</button>
             <h1 id="header-title" class="header-title">상담소</h1>
-            <div class="flex gap-3 text-white text-lg">
-                <button onclick="openHistory()"><i class="fas fa-history"></i></button>
-                <button onclick="checkAdmin()"><i class="fas fa-cog"></i></button>
+            <div class="flex gap-3 text-gray-500 text-lg">
+                <button onclick="openHistory()" title="기록"><i class="fas fa-history"></i></button>
+                <button onclick="checkAdmin()" title="설정"><i class="fas fa-cog"></i></button>
             </div>
         </header>
 
         <div id="tarot-app" class="hidden flex-1 flex flex-col overflow-hidden relative">
             <div id="tarot-view-start" class="flex flex-col items-center justify-center text-center h-full p-6">
-                <img id="mascot-tarot" src="./panda.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3069/3069172.png'" class="w-32 h-32 rounded-full border-4 border-green-700 bg-white object-cover mb-4">
+                <img id="mascot-tarot" src="./panda.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3069/3069172.png'" class="w-32 h-32 rounded-full border-4 border-green-700 bg-white object-cover mb-4 shadow-lg">
                 <h2 class="text-3xl font-impact text-green-900 mb-2">리얼 타로</h2>
-                <input type="text" id="tarot-input" placeholder="고민을 입력하세요" class="w-full p-4 border-2 border-green-600 rounded-xl text-center mb-4 text-lg" onkeypress="if(event.key==='Enter') startTarotFlow()">
+                <input type="text" id="tarot-input" placeholder="고민을 입력하세요" class="w-full p-4 border-2 border-green-600 rounded-xl text-center mb-4 text-lg bg-white shadow-inner" onkeypress="if(event.key==='Enter') startTarotFlow()">
                 <button class="action-btn btn-green" onclick="startTarotFlow()">카드 섞기</button>
             </div>
 
             <div id="tarot-shuffle-view" class="hidden h-full flex flex-col items-center justify-center bg-green-50">
+                <div class="text-6xl animate-spin mb-4">🔮</div>
                 <h3 class="text-2xl font-bold text-green-800 animate-pulse">운명을 섞는 중...</h3>
+                <p class="text-green-600 mt-2">Fisher-Yates Shuffle 적용 중</p>
             </div>
 
             <div id="tarot-view-game" class="hidden flex flex-col h-full overflow-hidden">
-                <div class="bg-green-100 p-4 text-center shadow-sm z-10 flex justify-between items-center">
+                <div class="bg-green-100 p-3 text-center shadow-sm z-10 flex justify-between items-center border-b border-green-200">
                     <div class="text-left">
                         <div id="tarot-deck-name" class="font-bold text-green-900 text-lg">덱 이름</div>
                         <div id="tarot-deck-info" class="text-sm text-green-700">0장 선택</div>
@@ -259,52 +273,54 @@
                     <div id="tarot-selection-count" class="font-bold text-green-800 text-2xl">0 / 3</div>
                 </div>
                 <div id="tarot-card-table"></div>
-                <div class="p-4 bg-white border-t z-20">
+                <div class="p-4 bg-white border-t z-20 shadow-lg">
                     <button id="tarot-next-btn" class="action-btn btn-green hidden" onclick="confirmTarotSelection()">결과 확인</button>
+                    <p id="tarot-guide" class="text-center text-gray-400 font-bold animate-pulse">카드를 선택해주세요</p>
                 </div>
             </div>
         </div>
 
         <div id="saju-app" class="hidden flex-1 flex flex-col p-6 overflow-y-auto">
             <div id="saju-view-start" class="flex flex-col items-center justify-center text-center h-full">
-                <img id="mascot-saju" src="./cat.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616430.png'" class="w-32 h-32 rounded-full border-4 border-red-500 bg-white object-cover mb-4">
+                <img id="mascot-saju" src="./cat.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/616/616430.png'" class="w-32 h-32 rounded-full border-4 border-red-500 bg-white object-cover mb-4 shadow-lg">
                 <h2 class="text-3xl font-impact text-red-900 mb-2">정통 사주</h2>
-                <div class="w-full bg-white p-6 rounded-xl border border-red-200 space-y-4 shadow-sm">
-                    <input type="date" id="saju-date" class="w-full p-3 border rounded text-center text-lg" value="2000-01-01">
+                <div class="w-full bg-white p-6 rounded-xl border border-red-200 space-y-4 shadow-md">
+                    <input type="date" id="saju-date" class="w-full p-3 border rounded text-center text-lg bg-red-50" value="2000-01-01">
                     <div class="flex gap-2">
-                        <input type="time" id="saju-time" class="w-full p-3 border rounded text-center" value="12:00">
-                        <select id="saju-gender" class="w-full p-3 border rounded text-center"><option value="male">남성</option><option value="female">여성</option></select>
+                        <input type="time" id="saju-time" class="w-full p-3 border rounded text-center bg-red-50" value="12:00">
+                        <select id="saju-gender" class="w-full p-3 border rounded text-center bg-red-50"><option value="male">남성</option><option value="female">여성</option></select>
                     </div>
                     <button class="action-btn btn-red" onclick="processSajuManse()">만세력 보기</button>
                 </div>
             </div>
             <div id="saju-view-icebreak" class="hidden h-full flex flex-col">
-                <div class="bg-white p-4 rounded-xl border-2 border-red-800 mb-4 text-center">
-                    <div id="saju-pillars" class="flex justify-center gap-2 mb-2"></div>
-                    <p id="saju-persona-msg">분석 완료</p>
+                <div class="bg-white p-6 rounded-xl border-2 border-red-800 mb-4 text-center shadow-lg">
+                    <div id="saju-pillars" class="flex justify-center gap-3 mb-3"></div>
+                    <p id="saju-persona-msg" class="text-gray-700 font-medium">분석 완료</p>
                 </div>
                 <div class="mt-auto">
-                    <input type="text" id="saju-input" placeholder="질문 입력" class="w-full p-4 border-2 border-red-800 rounded-xl mb-4 text-lg">
+                    <input type="text" id="saju-input" placeholder="궁금한 점을 입력하세요" class="w-full p-4 border-2 border-red-800 rounded-xl mb-4 text-lg bg-white shadow-inner">
                     <button class="action-btn btn-red" onclick="startSajuConsult()">상담 하기</button>
                 </div>
             </div>
         </div>
 
         <div id="common-view-loading" class="hidden absolute inset-0 bg-white/95 z-50 flex flex-col items-center justify-center text-center">
+            <div class="text-5xl animate-bounce mb-4">✨</div>
             <p id="loading-text" class="text-2xl font-bold text-gray-700 animate-pulse">분석 중...</p>
         </div>
         <div id="common-view-result" class="hidden absolute inset-0 bg-white z-40 flex flex-col p-6 overflow-y-auto">
-            <div class="text-right mb-2"><button onclick="resetCurrentMode()" class="text-gray-500 underline">처음으로</button></div>
-            <div class="bg-gray-100 p-4 rounded-xl mb-4"><span class="font-bold">Q.</span> <span id="result-question"></span></div>
-            <div class="flex-1 bg-white border rounded-xl p-4 overflow-y-auto">
-                <div id="result-content" class="markdown-body leading-relaxed"></div>
+            <div class="text-right mb-2"><button onclick="resetCurrentMode()" class="text-gray-500 underline font-bold">처음으로</button></div>
+            <div class="bg-gray-100 p-4 rounded-xl mb-4 shadow-sm border border-gray-200"><span class="font-bold text-blue-600">Q.</span> <span id="result-question" class="font-bold"></span></div>
+            <div class="flex-1 bg-white border border-gray-200 rounded-xl p-5 overflow-y-auto shadow-inner">
+                <div id="result-content" class="markdown-body leading-relaxed text-gray-800"></div>
             </div>
             <button class="action-btn bg-gray-800 text-white mt-4" onclick="resetCurrentMode()">닫기</button>
         </div>
         
         <div id="common-view-history" class="hidden absolute inset-0 bg-white z-50 flex flex-col p-6">
-            <h3 class="text-center font-bold text-2xl mb-4">기록</h3>
-            <div id="history-list" class="flex-1 overflow-y-auto space-y-3"></div>
+            <h3 class="text-center font-bold text-2xl mb-4 font-impact">상담 기록</h3>
+            <div id="history-list" class="flex-1 overflow-y-auto space-y-3 p-2"></div>
             <button class="action-btn bg-gray-300 text-gray-800 mt-4" onclick="document.getElementById('common-view-history').classList.add('hidden')">닫기</button>
         </div>
     </div>
@@ -314,8 +330,8 @@
             <h3 class="font-bold text-xl mb-4 border-b pb-2">⚙️ 관리자 설정</h3>
             
             <div class="space-y-4">
-                <div class="bg-gray-50 p-3 rounded border">
-                    <label class="block text-xs font-bold text-blue-600 mb-1">로그인 화면 (위장용)</label>
+                <div class="bg-blue-50 p-3 rounded border border-blue-100">
+                    <label class="block text-xs font-bold text-blue-600 mb-2">로그인 화면 (위장용)</label>
                     <div class="mb-2">
                         <span class="text-xs text-gray-500">메인 타이틀</span>
                         <input type="text" id="admin-login-title" class="w-full border p-2 rounded text-sm" placeholder="예: HG AI Agents">
@@ -326,33 +342,33 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-50 p-3 rounded border">
-                    <label class="block text-xs font-bold text-green-600 mb-1">캐릭터 설정 (타로)</label>
+                <div class="bg-green-50 p-3 rounded border border-green-100">
+                    <label class="block text-xs font-bold text-green-600 mb-2">캐릭터 설정 (타로)</label>
                     <div class="mb-2">
-                        <span class="text-xs text-gray-500">이름</span>
+                        <span class="text-xs text-gray-500">이름 (선택화면 표시)</span>
                         <input type="text" id="admin-tarot-name" class="w-full border p-2 rounded text-sm" placeholder="예: 타로 판다">
                     </div>
                     <div class="flex items-center gap-2">
-                        <img id="preview-panda" class="w-10 h-10 rounded border">
+                        <img id="preview-panda" class="w-10 h-10 rounded border bg-white object-cover">
                         <input type="file" id="file-panda" accept="image/*" class="text-xs" onchange="previewFile(this, 'preview-panda')">
                     </div>
                 </div>
 
-                <div class="bg-gray-50 p-3 rounded border">
-                    <label class="block text-xs font-bold text-red-600 mb-1">캐릭터 설정 (사주)</label>
+                <div class="bg-red-50 p-3 rounded border border-red-100">
+                    <label class="block text-xs font-bold text-red-600 mb-2">캐릭터 설정 (사주)</label>
                     <div class="mb-2">
-                        <span class="text-xs text-gray-500">이름</span>
+                        <span class="text-xs text-gray-500">이름 (선택화면 표시)</span>
                         <input type="text" id="admin-saju-name" class="w-full border p-2 rounded text-sm" placeholder="예: 무속 냥이">
                     </div>
                     <div class="flex items-center gap-2">
-                        <img id="preview-cat" class="w-10 h-10 rounded border">
+                        <img id="preview-cat" class="w-10 h-10 rounded border bg-white object-cover">
                         <input type="file" id="file-cat" accept="image/*" class="text-xs" onchange="previewFile(this, 'preview-cat')">
                     </div>
                 </div>
             </div>
 
-            <button onclick="saveAdmin()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold mt-6">저장 및 적용</button>
-            <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="w-full p-3 text-gray-500 mt-2">닫기</button>
+            <button onclick="saveAdmin()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold mt-6 hover:bg-blue-700 transition">저장 및 적용</button>
+            <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="w-full p-3 text-gray-500 mt-2 hover:bg-gray-100 rounded-lg">닫기</button>
         </div>
     </div>
 </div>
@@ -361,6 +377,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+    // Firebase Config (기존 유지)
     const tarotConfig = { apiKey: "AIzaSyDuQDOi5wxabpqdqu-CJfdR-krk5Q08tBA", projectId: "test-9da10", appId: "1:578765851412:web:5d9d30e09f8427d1a49001" };
     const sajuConfig = { apiKey: "AIzaSyB-y3inMOTdj48gwlh0eftUc_YfyNTeJmc", projectId: "sajutest-e4eaa", appId: "1:753725539148:web:f2d67dd6b3adf6514345e9" };
     
@@ -372,7 +389,6 @@
     let gameState = { stage: 0, deck: [], selections: [], question: "", finalSelections: {} };
     let sajuState = { pillars: [], info: {} };
     
-    // 이미지 데이터 저장용
     let imgPandaBase64 = null;
     let imgCatBase64 = null;
 
@@ -393,7 +409,10 @@
         document.getElementById('selection-screen').classList.add('hidden');
         document.getElementById('main-app-ui').classList.remove('hidden');
         document.body.className = ''; document.body.classList.add(`theme-${mode}`);
-        document.getElementById('header-title').innerText = mode==='tarot' ? document.getElementById('text-panda').innerText : document.getElementById('text-cat').innerText;
+        // 헤더 타이틀 업데이트
+        const tarotName = document.getElementById('text-panda').innerText;
+        const sajuName = document.getElementById('text-cat').innerText;
+        document.getElementById('header-title').innerText = mode==='tarot' ? tarotName : sajuName;
         
         document.getElementById('tarot-app').classList.add('hidden');
         document.getElementById('saju-app').classList.add('hidden');
@@ -464,7 +483,7 @@
             alert("저장되었습니다. 새로고침됩니다.");
             location.reload();
         } else {
-            alert("DB 연결 실패");
+            alert("DB 연결 실패. 로컬 테스트 중이라면 기능이 제한됩니다.");
         }
     };
 
@@ -474,11 +493,15 @@
             const docSnap = await getDoc(doc(dbTarot, "settings", "global_config"));
             if(docSnap.exists()) {
                 const d = docSnap.data();
+                // 1. 로그인 화면 텍스트
                 if(d.loginTitle) document.getElementById('login-title-text').innerText = d.loginTitle;
                 if(d.loginDesc) document.getElementById('login-desc-text').innerText = d.loginDesc;
+                
+                // 2. 선택 화면 텍스트 (이름표)
                 if(d.tarotName) document.getElementById('text-panda').innerText = d.tarotName;
                 if(d.sajuName) document.getElementById('text-cat').innerText = d.sajuName;
                 
+                // 3. 이미지
                 if(d.imgPanda) {
                     document.getElementById('img-panda').src = d.imgPanda;
                     document.getElementById('mascot-tarot').src = d.imgPanda;
@@ -491,7 +514,7 @@
         } catch(e) { console.log("Config load error", e); }
     }
 
-    // --- Tarot Game Logic (기존 유지) ---
+    // --- Tarot Game Logic ---
     const DECK_DATA = {
         waite: { name: "유니버셜 웨이트", count: 78, pick: 3, cards: Array.from({length:78}, (_,i)=>`Waite Card ${i}`) },
         belline: { name: "호로스코프 벨린", count: 53, pick: 3, cards: Array.from({length:53}, (_,i)=>`Belline Card ${i}`) },
@@ -530,7 +553,7 @@
             document.getElementById('tarot-shuffle-view').classList.add('hidden');
             document.getElementById('tarot-view-game').classList.remove('hidden');
             renderTable(deckInfo);
-        }, 1200);
+        }, 1500);
     }
 
     function renderTable(info) {
@@ -538,6 +561,7 @@
         document.getElementById('tarot-deck-info').innerText = `${info.pick}장 선택`;
         document.getElementById('tarot-selection-count').innerText = `0 / ${info.pick}`;
         document.getElementById('tarot-next-btn').classList.add('hidden');
+        document.getElementById('tarot-guide').classList.remove('hidden');
         const table = document.getElementById('tarot-card-table');
         table.innerHTML = "";
 
@@ -555,8 +579,13 @@
                     list.push(cardName);
                 }
                 document.getElementById('tarot-selection-count').innerText = `${list.length} / ${info.pick}`;
-                if(list.length === info.pick) document.getElementById('tarot-next-btn').classList.remove('hidden');
-                else document.getElementById('tarot-next-btn').classList.add('hidden');
+                if(list.length === info.pick) {
+                    document.getElementById('tarot-next-btn').classList.remove('hidden');
+                    document.getElementById('tarot-guide').classList.add('hidden');
+                } else {
+                    document.getElementById('tarot-next-btn').classList.add('hidden');
+                    document.getElementById('tarot-guide').classList.remove('hidden');
+                }
             };
             table.appendChild(card);
         });
@@ -588,7 +617,7 @@
             const data = JSON.parse(res);
             sajuState.pillars = data.pillars;
             const el = document.getElementById('saju-pillars'); el.innerHTML="";
-            data.pillars.forEach((p,i)=> el.innerHTML+=`<div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${data.colors[i]}">${p}</div>`);
+            data.pillars.forEach((p,i)=> el.innerHTML+=`<div class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md ${data.colors[i]}">${p}</div>`);
             document.getElementById('common-view-loading').classList.add('hidden');
             document.getElementById('saju-view-icebreak').classList.remove('hidden');
         } catch(e) { document.getElementById('common-view-loading').classList.add('hidden'); }
@@ -632,7 +661,7 @@
         snap.forEach(d => {
             const div = document.createElement('div');
             div.className = "bg-gray-100 p-3 rounded flex justify-between cursor-pointer hover:bg-gray-200";
-            div.innerHTML = `<span class="truncate w-3/4">${d.data().question}</span><button onclick="deleteItem('${col}','${d.id}')">🗑️</button>`;
+            div.innerHTML = `<span class="truncate w-3/4 font-bold text-gray-700">${d.data().question}</span><button class="text-red-500" onclick="deleteItem('${col}','${d.id}')">🗑️</button>`;
             div.onclick = (e) => { if(e.target.tagName!=='BUTTON') displayResult(d.data().question, d.data().response||d.data().answer); };
             list.appendChild(div);
         });
